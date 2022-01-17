@@ -10,7 +10,7 @@ from sanic_jwt_extended import JWT
 from datetime import timedelta
 from sanic_scheduler import SanicScheduler
 from sanic.log import logger
-from utilities.connections import connectPSQL
+from models.auth import signup,login
 
 app = Sanic("TG")
 app.blueprint(api)
@@ -22,7 +22,6 @@ app.error_handler.add(ServerError, server_error_handler)
 
 app.config.RESPONSE_TIMEOUT = 400000000000
 app.config.REQUEST_TIMEOUT = 400000000000
-connectPSQL()
 with JWT.initialize(app) as manager:
     manager.config.access_token_expires = timedelta(hours=5)
     manager.config.refresh_token_expires = timedelta(weeks=1)
