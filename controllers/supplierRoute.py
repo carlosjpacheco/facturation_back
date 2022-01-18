@@ -11,3 +11,18 @@ s = Blueprint('supplier', url_prefix='/supplier')
 @jwt_required
 async def ping(request: Request, token : Token):
     return await supplier.addSupplier(request.json,token.identity)
+
+@s.route('/delete', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await supplier.deleteSupplier(request.json,token.identity)
+
+@s.route('/update', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await supplier.updateSupplier(request.json,token.identity)
+
+@s.route('/search', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return supplier.searchSupplier(request.json)

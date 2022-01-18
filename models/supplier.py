@@ -35,7 +35,7 @@ def deleteSupplier(request,data):
 async def updateSupplier(request,data):
     try:
         cursor = connectPSQL()
-        valid = validSupplierInfo(request,data)
+        valid = await validSupplierInfo(request,data)
         if valid == True:
             if "name" in request:
                 sql_update = """Update supplier set name = %s where id = %s"""
@@ -43,17 +43,22 @@ async def updateSupplier(request,data):
             if "rif" in request:
                 sql_update = """Update supplier set rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update,(request["rif"],request["id"],))
-            if "type_dni" in request:
-                sql_update = """Update supplier set type_dni = %s where id = %s"""
-                cursor["cursor"].execute(sql_update,(request["type_dni"],request["id"],))
             cursor["conn"].commit()
+            return json({"data":"Usuario modificado con exito"})
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":error})
     
-def searchSupplier(request,data):
+def searchSupplier(request):
     try:
         cursor = connectPSQL()
+        query_search = """SELECT * from supplier WHERE name = %s OR rif = %s"""
+        cursor["cursor"].execute(query_search,(request["filter"],request["filter"],))
+        user = cursor["cursor"].fetchone()
+        if user:
+            return json({"user":"hola"})    
+        else:
+            return json({"error":"No se consiguio ningun usuario"})
     except (Exception, psycopg2.Error) as error:
         return json({"error":error},500)

@@ -43,13 +43,13 @@ async def validSupplierInfo(request,data):
     if "name" in request:
         sql_query = """SELECT * from supplier WHERE name = %s AND fk_users = %s"""
         cursor["cursor"].execute(sql_query,(request["name"],data,))
-        cursor["cursor"].fetchone()
-        if cursor["cursor"]:
+        user = cursor["cursor"].fetchone()
+        if user:
             return json({"error":"Ya tiene un proveedor registrado con ese nombre"})
     if "rif" in request:
         sql_query = """SELECT * from supplier WHERE rif = %s AND fk_users = %s"""
         cursor["cursor"].execute(sql_query,(request["rif"],data,))
-        cursor["cursor"].fetchone()
-        if cursor["cursor"]:
+        user = cursor["cursor"].fetchone()
+        if user:
             return json({"error":"Ya tiene un proveedor registrado con ese rif"})
     return True
