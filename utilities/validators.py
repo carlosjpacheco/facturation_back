@@ -22,6 +22,7 @@ async def validSignup(request):
     return True
 
 async def validUpdateUser(request,data):
+
     cursor = connectPSQL()
     user_query = """SELECT * FROM users WHERE id = %s"""
     cursor["cursor"].execute(user_query,(data,))
@@ -35,4 +36,20 @@ async def validUpdateUser(request,data):
             search_user = cursor["cursor"].fetchone()
             if search_user:
                 return json({"error":"Username no disponible"})
+    return True
+
+async def validSupplierInfo(request,data):
+    cursor = connectPSQL()
+    if "name" in request:
+        sql_query = """SELECT * from supplier WHERE name = %s AND fk_users = %s"""
+        cursor["cursor"].execute(sql_query,(request["name"],data,))
+        cursor["cursor"].fetchone()
+        if cursor["cursor"]:
+            return json({"error":"Ya tiene un proveedor registrado con ese nombre"})
+    if "rif" in request:
+        sql_query = """SELECT * from supplier WHERE rif = %s AND fk_users = %s"""
+        cursor["cursor"].execute(sql_query,(request["rif"],data,))
+        cursor["cursor"].fetchone()
+        if cursor["cursor"]:
+            return json({"error":"Ya tiene un proveedor registrado con ese rif"})
     return True

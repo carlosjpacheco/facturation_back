@@ -84,8 +84,9 @@ async def updateUser(request,data):
 async def deleteUser(request):
     try:
         cursor = connectPSQL()
-        sql_delete_query = """Delete from users where id = %s"""
+        sql_delete_query = """Update users set status=false where id = %s"""
         cursor["cursor"].execute(sql_delete_query, (request["id"],))
         cursor["conn"].commit()
+        return json({"data":"Usuario eliminado"})
     except (Exception, psycopg2.Error) as error:
         return json({"error":error},500)
