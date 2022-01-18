@@ -1,21 +1,29 @@
+import re
 from utilities.connections import connectPSQL
 from sanic.response import json
 
 async def validSignup(request):
     cursor = connectPSQL()
-    username_query= """SELECT * FROM users WHERE username= %s"""
-    cursor['cursor'].execute(username_query,(request['username'],))
-    if cursor["cursor"].fetchone():
-        return json({"error":"Username no disponible"})
-    dni_rif_query= """SELECT * FROM users WHERE dni_rif= %s"""
-    cursor['cursor'].execute(dni_rif_query,(request['dni_rif'],))
-    if cursor["cursor"].fetchone():
-        return json({"error":"Ya existe un usuario con el mismo numero de dni_rif"})
+    if "username" in request:
+        username_query= """SELECT * FROM users WHERE username= %s"""
+        cursor['cursor'].execute(username_query,(request['username'],))
+        if cursor["cursor"].fetchone():
+            return json({"error":"Username no disponible"})
+    if "dni_rif" in request:
+        dni_rif_query= """SELECT * FROM users WHERE dni_rif= %s"""
+        cursor['cursor'].execute(dni_rif_query,(request['dni_rif'],))
+        if cursor["cursor"].fetchone():
+            return json({"error":"Ya existe un usuario con el mismo numero de dni_rif"})
+    if "rif" in request:
+        dni_rif_query= """SELECT * FROM supplier WHERE rif= %s"""
+        cursor['cursor'].execute(dni_rif_query,(request['rif'],))
+        if cursor["cursor"].fetchone():
+            return json({"error":"Ya existe un proveedor con el mismo numero de rif"})
     return True
 
 async def validUpdateUser(request,data):
     cursor = connectPSQL()
-    user_query = """SELECT * FROM users WHERE dni_rif= %s"""
+    user_query = """SELECT * FROM users WHERE id = %s"""
     cursor["cursor"].execute(user_query,(data,))
     user = cursor["cursor"].fetchone()
     if user:

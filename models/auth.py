@@ -22,20 +22,14 @@ async def signup(request):
         return json({"error":error},500)
 
 def login(request):
-    conn = psycopg2.connect(
-        host="localhost",
-        database="invoicing_system",
-        user="admin",
-        password="admin"
-    )
-    cursor = conn.cursor()
+    cursor = connectPSQL()
 
     
     sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
 
-    cursor.execute(sql_select_query, (request["username"],request["psw"],))
+    cursor["cursor"].execute(sql_select_query, (request["username"],request["psw"],))
 
-    user = cursor.fetchone()
+    user = cursor["cursor"].fetchone()
     if user:
         return json(
             {
@@ -48,8 +42,8 @@ def login(request):
                             "name":user[4],
                             "last_name":user[5],
                             "id_role":user[6]},
-                    'token': JWT.create_access_token(identity=user[3]),
-                    'refresh': JWT.create_refresh_token(identity=user[3])                    
+                    'token': JWT.create_access_token(identity=user[0]),
+                    'refresh': JWT.create_refresh_token(identity=user[0])                    
                 },
                 'type': 'auth',
                 'code': 200
@@ -60,34 +54,28 @@ def login(request):
 
 async def updateUser(request,data):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="invoicing_system",
-            user="admin",
-            password="admin"
-        )
-        cursor = conn.cursor()
+        cursor = connectPSQL()
         valid = await validUpdateUser(request,data)
         if valid == True:
             if "username" in request:
-                sql_update_query = """Update users set username = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["username"],data,))
+                sql_update_query = """Update users set username = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["username"],data,))
             if "id_role" in request:
-                sql_update_query = """Update users set id_role = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["id_role"],data,))
+                sql_update_query = """Update users set id_role = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["id_role"],data,))
             if "psw" in request:
-                sql_update_query = """Update users set psw = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["psw"],data))
+                sql_update_query = """Update users set psw = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["psw"],data))
             if "first_name" in request:
-                sql_update_query = """Update users set first_name = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["first_name"],data))
+                sql_update_query = """Update users set first_name = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["first_name"],data))
             if "last_name" in request:
-                sql_update_query = """Update users set last_name = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["last_name"],data,))
+                sql_update_query = """Update users set last_name = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["last_name"],data,))
             if "type_dni" in request:
-                sql_update_query = """Update users set type_dni = %s where dni_rif = %s"""
-                cursor.execute(sql_update_query, (request["type_dni"],data,))
-            conn.commit()
+                sql_update_query = """Update users set type_dni = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["type_dni"],data,))
+            cursor["conn"].commit()
             return json({"data":"Record Updated successfully"})
         return valid
     except (Exception, psycopg2.Error) as error:
@@ -95,17 +83,9 @@ async def updateUser(request,data):
 
 async def deleteUser(request):
     try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="invoicing_system",
-            user="admin",
-            password="admin"
-        )
-        cursor = conn.cursor()
-
+        cursor = connectPSQL()
         sql_delete_query = """Delete from users where id = %s"""
-        cursor.execute(sql_delete_query, (request["id"],))
-        conn.commit()
-        
+        cursor["cursor"].execute(sql_delete_query, (request["id"],))
+        cursor["conn"].commit()
     except (Exception, psycopg2.Error) as error:
         return json({"error":error},500)
