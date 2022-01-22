@@ -1,4 +1,5 @@
 from sqlite3 import Cursor
+from matplotlib import use
 from sanic import request
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
@@ -19,6 +20,7 @@ async def addSupplier(request,data):
                 "rif":request["rif"],
                 "name":request["name"],
                 "type_dni":request["type_dni"]})
+        return valid
     except (Exception, psycopg2.Error) as error:
         return json({"error":error},500)
 
@@ -57,7 +59,7 @@ def searchSupplier(request):
         cursor["cursor"].execute(query_search,(request["filter"],request["filter"],))
         user = cursor["cursor"].fetchone()
         if user:
-            return json({"user":"hola"})    
+            return json({"data":{"supplier":{"name":user[1],"rif":user[3]+"-"+user[2]}}})    
         else:
             return json({"error":"No se consiguio ningun usuario"})
     except (Exception, psycopg2.Error) as error:
