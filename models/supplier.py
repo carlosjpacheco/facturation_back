@@ -30,7 +30,7 @@ def deleteSupplier(request,data):
         sql_delete_query = """Delete from supplier where id = %s AND fk_user=%s"""
         cursor["cursor"].execute(sql_delete_query, (request["id"],data))
         cursor["conn"].commit()
-        return json({"data":"Proveedor eliminado"})
+        return json({"data":"Proveedor eliminado con éxito"})
     except (Exception, psycopg2.Error) as error:
         return json({"error":error},500)
 
@@ -46,7 +46,7 @@ async def updateSupplier(request,data):
                 sql_update = """Update supplier set rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update,(request["rif"],request["id"],))
             cursor["conn"].commit()
-            return json({"data":"Usuario modificado con exito"})
+            return json({"data":"Usuario modificado con éxito"})
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
