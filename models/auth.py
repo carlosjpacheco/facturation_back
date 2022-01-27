@@ -1,4 +1,3 @@
-from sanic import request
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
@@ -12,7 +11,7 @@ async def signup(request):
         cursor = connectPSQL()
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
-            record_to_insert =(request["username"],request["password"],request["dni_rif"],request["name"],request["last_name"],request["id_role"],request["type_dni"])
+            record_to_insert =(request["username"],request["password"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
             return json({"data":"Record inserted successfully into table"})
