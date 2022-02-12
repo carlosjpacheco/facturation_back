@@ -1,12 +1,9 @@
-from os import PRIO_USER
-from rsa import encrypt
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
-from utilities.functions import decodePsw, encodePsw
+from utilities.functions import encodePsw
 from utilities.validators import validSignup, validUpdateUser
-import json as jsonConvert
 
 async def signup(request):
     try:
@@ -18,7 +15,7 @@ async def signup(request):
             record_to_insert =(request["username"],request["password"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
-            return json({"data":"Record inserted successfully into table"})
+            return json({"data":"Record inserted successfully into table","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
