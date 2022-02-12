@@ -1,14 +1,18 @@
+from os import PRIO_USER
+from rsa import encrypt
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
+from utilities.functions import decodePsw, encodePsw
 from utilities.validators import validSignup, validUpdateUser
-
+import json as jsonConvert
 
 async def signup(request):
     try:
         valid = await validSignup(request)
         cursor = connectPSQL()
+        request["psw"]= encodePsw(request["psw"])
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
             record_to_insert =(request["username"],request["password"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
@@ -21,35 +25,36 @@ async def signup(request):
         return json({"error":error},500)
 
 def login(request):
-    cursor = connectPSQL()
+    try:
+        cursor = connectPSQL()
+        request["psw"] = encodePsw(request["psw"])
+        sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
 
-    
-    sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
+        cursor["cursor"].execute(sql_select_query, (request["username"],str(request["psw"]),))
 
-    cursor["cursor"].execute(sql_select_query, (request["username"],request["psw"],))
-
-    user = cursor["cursor"].fetchone()
-    if user:
-        return json(
-            {
-                'data':{
-                    'user': {
-                            "id":user[0],
-                            "username":user[1],
-                            "password":user[2],
-                            "dni_rif":user[3],
-                            "name":user[4],
-                            "last_name":user[5],
-                            "id_role":user[6]},
-                    'token': JWT.create_access_token(identity=user[0]),
-                    'refresh': JWT.create_refresh_token(identity=user[0])                    
-                },
-                'type': 'auth',
-                'code': 200
-            }
-        )
-    else:
-        return json({"error":"Usuario o contrasena incorrecta"})
+        user = cursor["cursor"].fetchone()
+        if user:
+            return json(
+                {
+                    'data':{
+                        'user': {
+                                "id":user[0],
+                                "username":user[1],
+                                "dni_rif":user[3],
+                                "name":user[4],
+                                "last_name":user[5]
+                                },
+                        'token': JWT.create_access_token(identity=user[0]),
+                        'refresh': JWT.create_refresh_token(identity=user[0])                    
+                    },
+                    'type': 'auth',
+                    'code': 200
+                }
+            )
+        else:
+            return json({"error":"Usuario o contrasena incorrecta","code":500},500)
+    except Exception as error:
+        return json({"error":str(error),"code":500},500)
 
 async def updateUser(request,data):
     try:
