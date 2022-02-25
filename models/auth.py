@@ -19,12 +19,13 @@ async def signup(request):
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)
 
 def login(request):
     try:
         cursor = connectPSQL()
         request["psw"] = encodePsw(request["psw"])
+        # print(str(request["psw"]))
         sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
 
         cursor["cursor"].execute(sql_select_query, (request["username"],str(request["psw"]),))
@@ -44,7 +45,6 @@ def login(request):
                         'token': JWT.create_access_token(identity=user[0]),
                         'refresh': JWT.create_refresh_token(identity=user[0])                    
                     },
-                    'type': 'auth',
                     'code': 200
                 }
             )
@@ -77,10 +77,10 @@ async def updateUser(request,data):
                 sql_update_query = """Update users set type_dni = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["type_dni"],data,))
             cursor["conn"].commit()
-            return json({"data":"Record Updated successfully"})
+            return json({"data":"Record Updated successfully","code":200},200)
         return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)
 
 async def deleteUser(request):
     try:
@@ -88,6 +88,6 @@ async def deleteUser(request):
         sql_delete_query = """Update users set status=false where id = %s"""
         cursor["cursor"].execute(sql_delete_query, (request["id"],))
         cursor["conn"].commit()
-        return json({"data":"Usuario eliminado"})
+        return json({"data":"Usuario eliminado","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)

@@ -19,10 +19,11 @@ async def addSupplier(request,data):
             return json({    
                 "rif":request["rif"],
                 "name":request["name"],
-                "type_dni":request["type_dni"]})
+                "type_dni":request["type_dni"],
+                "code":200},200)
         return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)
 
 def deleteSupplier(request,data):
     try:
@@ -30,9 +31,9 @@ def deleteSupplier(request,data):
         sql_delete_query = """Delete from supplier where id = %s AND fk_user=%s"""
         cursor["cursor"].execute(sql_delete_query, (request["id"],data))
         cursor["conn"].commit()
-        return json({"data":"Proveedor eliminado con éxito"})
+        return json({"data":"Proveedor eliminado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)
 
 async def updateSupplier(request,data):
     try:
@@ -46,11 +47,11 @@ async def updateSupplier(request,data):
                 sql_update = """Update supplier set rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update,(request["rif"],request["id"],))
             cursor["conn"].commit()
-            return json({"data":"Usuario modificado con éxito"})
+            return json({"data":"Usuario modificado con éxito","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error})
+        return json({"error":str(error),"code":500},500)
     
 def searchSupplier(request):
     try:
@@ -61,6 +62,6 @@ def searchSupplier(request):
         if user:
             return json({"data":{"supplier":{"name":user[1],"rif":user[3]+"-"+user[2]}}})    
         else:
-            return json({"error":"No se consiguio ningun usuario"})
+            return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        return json({"error":error},500)
+        return json({"error":str(error),"code":500},500)
