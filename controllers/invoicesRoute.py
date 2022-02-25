@@ -5,7 +5,6 @@ from sanic_jwt_extended.tokens import Token
 from sanic.request import Request
 
 inv = Blueprint('invoices', url_prefix='/invoices')
-
 @inv.route('/add', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):

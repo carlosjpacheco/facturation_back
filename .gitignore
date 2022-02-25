@@ -1,2 +1,12 @@
 __pycache__/
 TG/
+__pycache__/api.cpython-38.pyc
+controllers/__pycache__/authRoute.cpython-38.pyc
+controllers/__pycache__/notificationsRoute.cpython-38.pyc
+.gitignore
+models/__pycache__/auth.cpython-38.pyc
+.gitignore
+models/__pycache__/supplier.cpython-38.pyc
+.gitignore
+utilities/__pycache__/functions.cpython-38.pyc
+.gitignore
