@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 import time
 from utilities.connections import connectPSQL
 import psycopg2
@@ -56,14 +57,28 @@ async def searchInvoice(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-# async def updateInvoice(request):
-#     try:
-#         cursor = connectPSQL()
-#         valid = validInvoice(request)
-#         if valid == True:
-            
-#     except (Exception, psycopg2.Error) as error:
-#         return json({"error":str(error),"code":500},500)
+async def updateInvoice(request):
+    try:
+        cursor = connectPSQL()
+        valid = validInvoice(request)
+        if valid == True:
+            query = """
+                UPDATE invoices set 
+                    nro_invoice = %s,
+                    id_user = %s,
+                    nit = %s,
+                    price= %s,
+                    iva =%s,
+                    sub_total = %s,
+                    total = %s,
+                WHERE id = %s"""
+            records = (request["nro_invoice"],request["id_user"],request["nit"],request["price"],request["iva"],request["sub_total"],request["total"],request["id"],)
+            cursor["cursor"].execute(query,records)
+            cursor["conn"].commit()
+            await updateInvoiceDetail(request)
+
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
 
 def addInvoiceDetail(request):
     cursor = connectPSQL()
@@ -74,3 +89,21 @@ def addInvoiceDetail(request):
     records = (request["amount"],request["description"],request["quantity"],invoice[0],datetime.now().timestamp(),)
     cursor["cursor"].execute(query_noti,records)
     cursor["conn"].commit()
+
+async def updateInvoiceDetail(request):
+    try:
+        cursor = connectPSQL()
+        valid = validInvoice(request)
+        if valid == True:
+            query = """
+                UPDATE invoice_detail set 
+                    amount = %s,
+                    description = %s,
+                    quantity = %s
+                WHERE id_invoice = %s"""
+            records = (request["amount"],request["description"],request["quantity"],request["id"])
+            cursor["cursor"].execute(query,records)
+            cursor["conn"].commit()
+
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)

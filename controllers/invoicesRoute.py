@@ -19,3 +19,8 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return invoices.searchInvoice(request.json)
+
+@inv.route('/update', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.updateInvoice(request.json)

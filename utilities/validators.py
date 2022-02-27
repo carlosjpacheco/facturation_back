@@ -81,3 +81,14 @@ async def validInvoice(request):
         if invoice:
                return json({"error":"Ya tiene una factura agregada con e mismo número de nit","code":500},500)
     return True
+
+
+async def validPurchaseOrder(request):
+    cursor = connectPSQL()
+    if 'nro_order' in request:
+        sql_query = """SELECT * from purchase_order WHERE nro_order=%s"""
+        cursor["cursor"].execute(sql_query,(request["nro_orden"],))
+        invoice = cursor["cursor"].fetchone()   
+        if invoice:
+               return json({"error":"Ya tiene una orden de compra agregada con e mismo número de referencia","code":500},500)
+    return True
