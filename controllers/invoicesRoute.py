@@ -18,9 +18,14 @@ def ping(request: Request, token : Token):
 @inv.route('/search', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return invoices.searchInvoice(request.json)
+    return invoices.readInvoice(request.json)
 
 @inv.route('/update', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
     return invoices.updateInvoice(request.json)
+
+@inv.route('/list', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.listInvoices()

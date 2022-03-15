@@ -99,3 +99,6 @@ async def updatePurchaseOrderDetail(request):
 
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
+
+
+# Falta listar
