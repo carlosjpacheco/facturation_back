@@ -15,12 +15,17 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return purchase_order.delpurchaseOrder(request.json)
 
-@po.route('/search', methods=['POST'])
+@po.route('/read', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return purchase_order.searchpurchaseOrder(request.json)
+    return purchase_order.readPurchaseOrder(request.json)
 
 @po.route('/update', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
     return purchase_order.updatePurchaseOrder(request.json)
+
+@po.route('/list', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return purchase_order.listPurchaseOrder()
