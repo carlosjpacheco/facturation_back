@@ -33,7 +33,7 @@ async def delInvoice(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def searchInvoice(request):
+async def readInvoice(request):
     try:
         cursor = connectPSQL()
         query_search = """SELECT * from invoices WHERE id = %s"""
@@ -105,5 +105,33 @@ async def updateInvoiceDetail(request):
             cursor["cursor"].execute(query,records)
             cursor["conn"].commit()
 
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def listInvoices():
+    try:
+        cursor = connectPSQL()
+        invoicesArr = []
+        query_search = """SELECT * from invoices"""
+        cursor["cursor"].execute(query_search)
+        invoices = cursor["cursor"].fetchall()
+        if invoices:
+            for x in invoices:
+                invoicesJson = {
+                    "nro_invoices":x[1],
+                    "nit":x[3],
+                    "price":float(x[4]),
+                    "iva":float(x[5]),
+                    "sub_total":float(x[6]),
+                    "total":float(x[7]),
+                    "status":x[8],
+                    "paid":x[10],
+                    "date":x[11],
+                    "deleted":x[14]
+                }
+                invoicesArr.append(invoicesJson)
+            return json({"data":{"invoices":invoicesArr,"code":200}},200)
+        else:
+            return json({"data":"No se consiguio ninguna factura","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

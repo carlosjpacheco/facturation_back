@@ -26,3 +26,8 @@ async def ping(request: Request, token : Token):
 @jwt_required
 async def ping(request: Request, token : Token):
     return supplier.searchSupplier(request.json)
+
+@s.route('/list', methods=['GET'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return supplier.listSuppliers()

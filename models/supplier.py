@@ -1,6 +1,3 @@
-from sqlite3 import Cursor
-from sanic import request
-from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
@@ -15,10 +12,10 @@ async def addSupplier(request,data):
             record_to_insert =(request["rif"],request["name"],request["type_dni"],data)
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
-            return json({    
+            return json({"data":"Proveedor agregado con éxito","supplier":{   
                 "rif":request["rif"],
                 "name":request["name"],
-                "type_dni":request["type_dni"],
+                "type_dni":request["type_dni"]},
                 "code":200},200)
         return valid
     except (Exception, psycopg2.Error) as error:
@@ -63,4 +60,23 @@ def searchSupplier(request):
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+def listSuppliers():
+    try:
+        
+        supplierArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from supplier"""
+        cursor["cursor"].execute(query_search)
+        supplier = cursor["cursor"].fetchall()
+        for x in supplier:
+            supplierJson = {
+                "rif": x[1],
+                "name": x[2],
+                "type_dni": x[3]
+            }
+            supplierArr.append(supplierJson)
+        return json({"data":supplierArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

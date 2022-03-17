@@ -11,8 +11,8 @@ async def addPurchaseOrder(request,data):
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
-            query_noti = """INSERT INTO purchase_order (nro_order,id_user,date,completed,active) VALUES (%s,%s,%s)"""
-            records = (request["nro_order"],request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True)
+            query_noti = """INSERT INTO purchase_order (nro_order,id_user,date,completed,deleted) VALUES (%s,%s,%s,%s,%s)"""
+            records = (request["nro_order"],request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,)
             cursor["cursor"].execute(query_noti,records)
             cursor["conn"].commit()
             addPurchaseOrderDetail(request)
@@ -20,7 +20,7 @@ async def addPurchaseOrder(request,data):
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
-        return json({"error":str(error),"code":500},500)
+        return json({"error":error,"code":500},500)
 
 async def delpurchaseOrder(request):
     try:
@@ -32,7 +32,7 @@ async def delpurchaseOrder(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def searchpurchaseOrder(request):
+async def readPurchaseOrder(request):
     try:
         cursor = connectPSQL()
         cursor2 = connectPSQL()
@@ -57,9 +57,9 @@ async def searchpurchaseOrder(request):
 def addPurchaseOrderDetail(request):
     cursor = connectPSQL()
     query_search = """SELECT * from purchase_order WHERE nro_order = %s"""
-    cursor["cursor"].execute(query_search,(request["nro_purchaseOrder"],))
+    cursor["cursor"].execute(query_search,(request["nro_order"],))
     purchaseOrder = cursor["cursor"].fetchone()
-    query_noti = """INSERT INTO purchase)order (quantity,description,created_at,id_purchase_order) VALUES (%s,%s,%s,%s)"""
+    query_noti = """INSERT INTO detail_purchase_order (quantity,description,created_at,id_purchase_order) VALUES (%s,%s,%s,%s)"""
     records = (request["quantity"],request["description"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),purchaseOrder[0])
     cursor["cursor"].execute(query_noti,records)
     cursor["conn"].commit()
@@ -97,5 +97,26 @@ async def updatePurchaseOrderDetail(request):
             cursor["cursor"].execute(query,records)
             cursor["conn"].commit()
 
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+
+async def listPurchaseOrder():
+    try:
+        cursor = connectPSQL()
+        purchaseOrdersArr = []
+        query_search = """SELECT * from purchase_order"""
+        cursor["cursor"].execute(query_search)
+        purchaseOrders = cursor["cursor"].fetchall()
+        if purchaseOrders:
+            for x in purchaseOrders:
+                purchaseOrdersJson = {
+                    "nro_order":x[1],
+                    "date":x[3]
+                } 
+                purchaseOrdersArr.append(purchaseOrdersJson)
+            return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
+        else:
+            return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
