@@ -1,5 +1,4 @@
 from sqlite3 import Cursor
-from matplotlib import use
 from sanic import request
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL

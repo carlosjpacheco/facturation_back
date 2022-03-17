@@ -40,7 +40,8 @@ def login(request):
                                 "username":user[1],
                                 "dni_rif":user[3],
                                 "name":user[4],
-                                "last_name":user[5]
+                                "last_name":user[5],
+                                "rol":user[6]
                                 },
                         'token': JWT.create_access_token(identity=user[0]),
                         'refresh': JWT.create_refresh_token(identity=user[0])                    
