@@ -23,21 +23,22 @@ async def validSignup(request):
             return json({"error":"Ya existe un proveedor con el mismo numero de rif","code":500},500)
     return True
 
-async def validUpdateUser(request,data):
+async def validUpdateUser(request):
 
     cursor = connectPSQL()
     user_query = """SELECT * FROM users WHERE id = %s"""
-    cursor["cursor"].execute(user_query,(data,))
+    cursor["cursor"].execute(user_query,(request["id"],))
     user = cursor["cursor"].fetchone()
     if user:
         if "username" in request:
-            if request["username"]==user[1]:
-                return json({"error":"El nuevo username no puede ser el que ya esta en uso","code":500},500)
-            search_user_query = """SELECT * FROM users WHERE username= %s"""
-            cursor["cursor"].execute(search_user_query,(request["username"],))
-            search_user = cursor["cursor"].fetchone()
-            if search_user:
-                return json({"error":"Username no disponible","code":500},500)
+            # if request["username"]==user[1]:
+            #     return json({"error":"El nuevo username no puede ser el que ya esta en uso","code":500},500)
+            if request["username"]!=user[1]:
+                search_user_query = """SELECT * FROM users WHERE username= %s"""
+                cursor["cursor"].execute(search_user_query,(request["username"],))
+                search_user = cursor["cursor"].fetchone()
+                if search_user:
+                    return json({"error":"Username no disponible","code":500},500)
     return True
 
 async def validSupplierInfo(request,data):

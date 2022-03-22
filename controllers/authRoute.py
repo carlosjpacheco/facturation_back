@@ -19,7 +19,7 @@ def ping(request: Request):
 @ar.route('/update', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token:Token):
-    return await auth.updateUser(request.json,token.identity)
+    return await auth.updateUser(request.json)
 
 @ar.route('/list', methods=['GET'])
 @jwt_required

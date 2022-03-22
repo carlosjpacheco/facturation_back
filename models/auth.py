@@ -12,7 +12,7 @@ async def signup(request):
         request["psw"]= encodePsw(request["psw"])
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
-            record_to_insert =(request["username"],request["password"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
+            record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
             return json({"data":"Record inserted successfully into table","code":200},200)
@@ -54,29 +54,29 @@ def login(request):
     except Exception as error:
         return json({"error":str(error),"code":500},500)
 
-async def updateUser(request,data):
+async def updateUser(request):
     try:
         cursor = connectPSQL()
-        valid = await validUpdateUser(request,data)
+        valid = await validUpdateUser(request)
         if valid == True:
             if "username" in request:
                 sql_update_query = """Update users set username = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["username"],data,))
+                cursor["cursor"].execute(sql_update_query, (request["username"],request["id"],))
             if "id_role" in request:
                 sql_update_query = """Update users set id_role = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["id_role"],data,))
+                cursor["cursor"].execute(sql_update_query, (request["id_role"],request["id"],))
             if "psw" in request:
                 sql_update_query = """Update users set psw = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["psw"],data))
+                cursor["cursor"].execute(sql_update_query, (request["psw"],request["id"]))
             if "first_name" in request:
                 sql_update_query = """Update users set first_name = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["first_name"],data))
+                cursor["cursor"].execute(sql_update_query, (request["first_name"],request["id"]))
             if "last_name" in request:
                 sql_update_query = """Update users set last_name = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["last_name"],data,))
+                cursor["cursor"].execute(sql_update_query, (request["last_name"],request["id"],))
             if "type_dni" in request:
                 sql_update_query = """Update users set type_dni = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["type_dni"],data,))
+                cursor["cursor"].execute(sql_update_query, (request["type_dni"],request["id"],))
             cursor["conn"].commit()
             return json({"data":"Record Updated successfully","code":200},200)
         return valid
@@ -107,7 +107,7 @@ async def readUser(request):
                 "dni_rif": user[3],
                 "first_name": user[4],
                 "last_name": user[5],
-                "role":rol[1],
+                "role":rol[0],
                 "status": user[8]}}})    
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
@@ -129,6 +129,7 @@ async def listUsers():
             cursor["cursor"].execute(query_search,(str(x[6])))
             rol = cursor["cursor"].fetchone()
             usersJson = {
+                "id":x[0],
                 "username": x[1],
                 "dni_rif": x[3],
                 "first_name": x[4],
