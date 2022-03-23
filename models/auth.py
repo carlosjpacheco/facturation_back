@@ -108,6 +108,7 @@ async def readUser(request):
                 "first_name": user[4],
                 "last_name": user[5],
                 "role":rol[0],
+                "type_dni": user[7],
                 "status": user[8]}}})    
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
