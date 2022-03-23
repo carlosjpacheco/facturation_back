@@ -93,3 +93,17 @@ async def validPurchaseOrder(request):
         if invoice:
                return json({"error":"Ya tiene una orden de compra agregada con e mismo número de referencia","code":500},500)
     return True
+
+async def validContactInfo(request,data):
+    cursor = connectPSQL()
+    sql_query = """SELECT * from contact_supplier WHERE email = %s"""
+    cursor["cursor"].execute(sql_query,(request["email"],data,))
+    contact = cursor["cursor"].fetchone()
+    if contact:
+        return json({"error":"Ya tiene un contacto registrado con ese email","code":500},500)
+    sql_query = """SELECT * from contact_supplier WHERE phone_number = %s"""
+    cursor["cursor"].execute(sql_query,(request["phone_number"],data,))
+    contact = cursor["cursor"].fetchone()
+    if contact:
+        return json({"error":"Ya tiene un contacto registrado con ese número","code":500},500)
+    return True
