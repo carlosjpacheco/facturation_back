@@ -1,9 +1,8 @@
-from matplotlib import use
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
-from utilities.functions import encodePsw
+from utilities.functions import encodePsw, decodePsw
 from utilities.validators import validSignup, validUpdateUser
 
 async def signup(request):
@@ -107,6 +106,7 @@ async def readUser(request):
             return json({"data":{"user":{
                 "id":user[0],
                 "username": user[1],
+                "psw": str(decodePsw(user[2])),
                 "dni_rif": user[3],
                 "first_name": user[4],
                 "last_name": user[5],
