@@ -5,7 +5,7 @@ from utilities.validators import validSignup, validSupplierInfo
 
 async def addSupplier(request,data):
     try:
-        valid = await validSignup(request)
+        valid = await validSupplierInfo(request)
         cursor = connectPSQL()
         if valid == True:
             postgres_insert_query = """ INSERT INTO supplier (rif,name,type_dni,fk_users) VALUES (%s,%s,%s,%s)"""
@@ -71,12 +71,35 @@ def listSuppliers():
         cursor["cursor"].execute(query_search)
         supplier = cursor["cursor"].fetchall()
         for x in supplier:
+            query_search = """SELECT * from contact_supplier WHERE id = %s"""
+            cursor["cursor"].execute(query_search,(x[6],))
+            contact = cursor["cursor"].fetchaone()
             supplierJson = {
                 "rif": x[2],
                 "name": x[1],
-                "type_dni": x[3]
+                "type_dni": x[3],
+                "email":x[5],
+                "contact":{
+                    "first_name":contact[1],
+                    "last_name":contact[2],
+                    "phone_number":contact[3],
+                    "email":contact[4]
+                }
             }
             supplierArr.append(supplierJson)
         return json({"data":supplierArr,"code":200},200)
     except (Exception,psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+def readSupplier(request):
+    try:
+        cursor = connectPSQL()
+        query_search = """SELECT * from supplier WHERE id = %s"""
+        cursor["cursor"].execute(query_search,(request["id"],))
+        supplier = cursor["cursor"].fetchone()
+        if supplier:
+            return json({"data":{"supplier":{"name":supplier[1],"rif":supplier[3]+"-"+supplier[2]}}})    
+        else:
+            return json({"data":"No se consiguio ningun usuario","code":200},200)
+    except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
