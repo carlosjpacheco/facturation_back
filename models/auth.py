@@ -1,3 +1,4 @@
+from matplotlib import use
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
@@ -103,7 +104,9 @@ async def readUser(request):
             query_search = """SELECT * from role WHERE id = %s"""
             cursor["cursor"].execute(query_search,(str(user[6])))
             rol = cursor["cursor"].fetchone()
-            return json({"data":{"user":{"username": user[1],
+            return json({"data":{"user":{
+                "id":user[0],
+                "username": user[1],
                 "dni_rif": user[3],
                 "first_name": user[4],
                 "last_name": user[5],
@@ -113,9 +116,6 @@ async def readUser(request):
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
-
-
-
 
 async def listUsers():
     try:
@@ -129,6 +129,7 @@ async def listUsers():
             cursor["cursor"].execute(query_search,(str(x[6])))
             rol = cursor["cursor"].fetchone()
             usersJson = {
+                "id":x[0],
                 "username": x[1],
                 "dni_rif": x[3],
                 "first_name": x[4],

@@ -73,8 +73,8 @@ def listSuppliers():
         supplier = cursor["cursor"].fetchall()
         for x in supplier:
             supplierJson = {
-                "rif": x[1],
-                "name": x[2],
+                "rif": x[2],
+                "name": x[1],
                 "type_dni": x[3]
             }
             supplierArr.append(supplierJson)
