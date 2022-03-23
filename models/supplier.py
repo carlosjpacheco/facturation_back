@@ -8,14 +8,16 @@ async def addSupplier(request,data):
         valid = await validSupplierInfo(request)
         cursor = connectPSQL()
         if valid == True:
-            postgres_insert_query = """ INSERT INTO supplier (rif,name,type_dni,fk_users) VALUES (%s,%s,%s,%s)"""
-            record_to_insert =(request["rif"],request["name"],request["type_dni"],data)
+            postgres_insert_query = """ INSERT INTO supplier (rif,name,type_dni,fk_users,email,contact_id,address) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
+            record_to_insert =(request["rif"],request["name"],request["type_dni"],data,request["email"],request["contact_id"],request["address"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
             return json({"data":"Proveedor agregado con éxito","supplier":{   
                 "rif":request["rif"],
                 "name":request["name"],
-                "type_dni":request["type_dni"]},
+                "type_dni":request["type_dni"],
+                "email":request["email"],
+                "address":request["address"]},
                 "code":200},200)
         return valid
     except (Exception, psycopg2.Error) as error:
@@ -79,6 +81,7 @@ def listSuppliers():
                 "name": x[1],
                 "type_dni": x[3],
                 "email":x[5],
+                "address":x[7],
                 "contact":{
                     "first_name":contact[1],
                     "last_name":contact[2],
@@ -98,7 +101,7 @@ def readSupplier(request):
         cursor["cursor"].execute(query_search,(request["id"],))
         supplier = cursor["cursor"].fetchone()
         if supplier:
-            return json({"data":{"supplier":{"name":supplier[1],"rif":supplier[3]+"-"+supplier[2]}}})    
+            return json({"data":{"supplier":{"name":supplier[1],"rif":supplier[3]+"-"+supplier[2],"email":supplier[5],"address":supplier[7]}}})    
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:

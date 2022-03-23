@@ -12,7 +12,11 @@ async def addContact(request):
             record_to_insert =(request["first_name"],request["last_name"],request["phone_number"],request["email"],)
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
-            return json({"data":"Contacto agregado con éxito","supplier":{   
+            query_search = """SELECT * from contact_suppler WHERE phone_number = %s"""
+            cursor["cursor"].execute(query_search,(request["phone_number"],))
+            contact = cursor["cursor"].fetchone()
+            return json({"data":"Contacto agregado con éxito","contact":{
+                "id_contact":contact[0],
                 "first_name":request["first_name"],
                 "last_name":request["last_name"],
                 "phone_number":request["phone_number"],
