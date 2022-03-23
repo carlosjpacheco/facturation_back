@@ -1,4 +1,3 @@
-from matplotlib import use
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
