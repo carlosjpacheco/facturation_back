@@ -12,7 +12,7 @@ async def signup(request):
         request["psw"]= encodePsw(request["psw"])
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
-            record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],request["type_dni"])
+            record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V')
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
             return json({"data":"Record inserted successfully into table","code":200},200)
@@ -74,9 +74,9 @@ async def updateUser(request):
             if "last_name" in request:
                 sql_update_query = """Update users set last_name = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["last_name"],request["id"],))
-            if "type_dni" in request:
-                sql_update_query = """Update users set type_dni = %s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["type_dni"],request["id"],))
+            if "dni_rif" in request:
+                sql_update_query = """Update users set dni_rif = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["dni_rif"],request["id"],))
             cursor["conn"].commit()
             return json({"data":"Record Updated successfully","code":200},200)
         return valid

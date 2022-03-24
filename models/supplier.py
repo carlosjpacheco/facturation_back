@@ -72,18 +72,18 @@ def listSuppliers():
         supplier = cursor["cursor"].fetchall()
         for x in supplier:
             query_search = """SELECT * from contact_supplier WHERE id = %s"""
-            cursor["cursor"].execute(query_search,(x[6],))
-            contact = cursor["cursor"].fetchaone()
+            cursor["cursor"].execute(query_search,(x[5],))
+            contact = cursor["cursor"].fetchall()
             supplierJson = {
                 "rif": x[2],
                 "name": x[1],
                 "type_dni": x[3],
                 "email":x[5],
                 "contact":{
-                    "first_name":contact[1],
-                    "last_name":contact[2],
-                    "phone_number":contact[3],
-                    "email":contact[4]
+                    "first_name":contact[0][1],
+                    "last_name":contact[0][2],
+                    "phone_number":contact[0][3],
+                    "email":contact[0][4]
                 }
             }
             supplierArr.append(supplierJson)
