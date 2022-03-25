@@ -12,6 +12,7 @@ def encodePsw(password):
     
 def decodePsw(password):
     try:
+        password = password.decode("UTF-8")
         encrypt = base64.b64decode(password)
         return encrypt
     except Exception as error:

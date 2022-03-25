@@ -31,6 +31,11 @@ async def ping(request: Request, token:Token):
 async def ping(request: Request, token:Token):
     return await auth.readUser(request.json)
 
+@ar.route('/delete', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token:Token):
+    return await auth.deleteUser(request.json)
+
 @ar.route('/search', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token:Token):
