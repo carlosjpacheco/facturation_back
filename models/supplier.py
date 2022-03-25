@@ -21,11 +21,11 @@ async def addSupplier(request,data):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-def deleteSupplier(request,data):
+def deleteSupplier(request):
     try:
         cursor = connectPSQL()
-        sql_delete_query = """Delete from supplier where id = %s AND fk_user=%s"""
-        cursor["cursor"].execute(sql_delete_query, (request["id"],data))
+        sql_delete_query = """Update supplier set status=false where id = %s"""
+        cursor["cursor"].execute(sql_delete_query, (request["id"],))
         cursor["conn"].commit()
         return json({"data":"Proveedor eliminado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
@@ -75,6 +75,7 @@ def listSuppliers():
             cursor["cursor"].execute(query_search,(x[5],))
             contact = cursor["cursor"].fetchall()
             supplierJson = {
+                "id": x[0],
                 "rif": x[2],
                 "name": x[1],
                 "type_dni": x[3],
@@ -84,7 +85,8 @@ def listSuppliers():
                     "last_name":contact[0][2],
                     "phone_number":contact[0][3],
                     "email":contact[0][4]
-                }
+                },
+                "status":x[6],
             }
             supplierArr.append(supplierJson)
         return json({"data":supplierArr,"code":200},200)

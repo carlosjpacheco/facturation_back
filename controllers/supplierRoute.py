@@ -15,7 +15,7 @@ async def ping(request: Request, token : Token):
 @s.route('/delete', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token : Token):
-    return await supplier.deleteSupplier(request.json,token.identity)
+    return supplier.deleteSupplier(request.json)
 
 @s.route('/update', methods=['POST'])
 @jwt_required
