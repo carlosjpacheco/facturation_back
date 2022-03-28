@@ -41,20 +41,43 @@ async def validUpdateUser(request):
                     return json({"error":"Username no disponible","code":500},500)
     return True
 
-async def validSupplierInfo(request,data):
+async def validSupplierInfo(request):
     cursor = connectPSQL()
     if "name" in request:
-        sql_query = """SELECT * from supplier WHERE name = %s AND fk_users = %s"""
-        cursor["cursor"].execute(sql_query,(request["name"],data,))
-        user = cursor["cursor"].fetchone()
-        if user:
+        sql_query = """SELECT * from supplier WHERE name = %s"""
+        cursor["cursor"].execute(sql_query,(request["name"],))
+        supplier = cursor["cursor"].fetchone()
+        if supplier:
             return json({"error":"Ya tiene un proveedor registrado con ese nombre","code":500},500)
     if "rif" in request:
-        sql_query = """SELECT * from supplier WHERE rif = %s AND fk_users = %s"""
-        cursor["cursor"].execute(sql_query,(request["rif"],data,))
-        user = cursor["cursor"].fetchone()
-        if user:
+        sql_query = """SELECT * from supplier WHERE rif = %s"""
+        cursor["cursor"].execute(sql_query,(request["rif"],))
+        supplier = cursor["cursor"].fetchone()
+        if supplier:
             return json({"error":"Ya tiene un proveedor registrado con ese rif","code":500},500)
+    return True
+
+async def validUpdateSupplier(request):
+
+    cursor = connectPSQL()
+    user_query = """SELECT * FROM supplier WHERE id = %s"""
+    cursor["cursor"].execute(user_query,(request["id"],))
+    supplier = cursor["cursor"].fetchone()
+    if supplier:
+        if "name" in request:
+            if request["name"]!=supplier[1]:
+                search_user_query = """SELECT * from supplier WHERE name = %s"""
+                cursor["cursor"].execute(search_user_query,(request["name"],))
+                search_supplier = cursor["cursor"].fetchone()
+                if search_supplier:
+                    return json({"error":"Ya hay un proveedor con este nombre","code":500},500)
+        if "rif" in request:
+            if request["rif"]!=supplier[2]:
+                search_user_query = """SELECT * from supplier WHERE rif = %s"""
+                cursor["cursor"].execute(search_user_query,(request["rif"],))
+                search_supplier = cursor["cursor"].fetchone()
+                if search_supplier:
+                    return json({"error":"Ya hay un proveedor con este RIF","code":500},500)
     return True
 
 async def validRol(request):
