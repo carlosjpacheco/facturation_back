@@ -6,8 +6,8 @@ def connectPSQL():
         conn = psycopg2.connect(
             host="localhost",
             database="invoicing_system",
-            user="postgres",
-            password="postgres"
+            user="admin",
+            password="admin"
         )
         cursor = conn.cursor()
         connection = {

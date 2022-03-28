@@ -10,3 +10,4 @@ models/__pycache__/supplier.cpython-38.pyc
 .gitignore
 utilities/__pycache__/functions.cpython-38.pyc
 .gitignore
+server.py

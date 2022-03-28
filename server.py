@@ -43,4 +43,4 @@ with JWT.initialize(app) as manager:
     manager.handler.fresh_token_required = fresh_token_required
     manager.handler.access_denied = access_denied
 
-app.run(debug=False, host="0.0.0.0", port=7600, auto_reload=True,workers=1)
+app.run(debug=False, host="0.0.0.0", port=7650, auto_reload=True,workers=1)
