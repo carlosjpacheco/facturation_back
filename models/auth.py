@@ -32,23 +32,26 @@ def login(request):
 
         user = cursor["cursor"].fetchone()
         if user:
-            return json(
-                {
-                    'data':{
-                        'user': {
-                                "id":user[0],
-                                "username":user[1],
-                                "dni_rif":user[3],
-                                "name":user[4],
-                                "last_name":user[5],
-                                "rol":user[6]
-                                },
-                        'token': JWT.create_access_token(identity=user[0]),
-                        'refresh': JWT.create_refresh_token(identity=user[0])                    
-                    },
-                    'code': 200
-                }
-            )
+            if user[8] == True:
+                return json(
+                    {
+                        'data':{
+                            'user': {
+                                    "id":user[0],
+                                    "username":user[1],
+                                    "dni_rif":user[3],
+                                    "name":user[4],
+                                    "last_name":user[5],
+                                    "rol":user[6]
+                                    },
+                            'token': JWT.create_access_token(identity=user[0]),
+                            'refresh': JWT.create_refresh_token(identity=user[0])                    
+                        },
+                        'code': 200
+                    }
+                )
+            else:
+                return json({"error":"Usuario Inactivo","code":500},500)
         else:
             return json({"error":"Usuario o contrasena incorrecta","code":500},500)
     except Exception as error:
@@ -86,8 +89,12 @@ async def updateUser(request):
 async def deleteUser(request):
     try:
         cursor = connectPSQL()
-        sql_delete_query = """Update users set status=false where id = %s"""
-        cursor["cursor"].execute(sql_delete_query, (request["id"],))
+        if request["status"] == True:
+            status = False
+        else:
+            status = True
+        sql_delete_query = """Update users set status=%s where id = %s"""
+        cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
         cursor["conn"].commit()
         return json({"data":"Usuario eliminado","code":200},200)
     except (Exception, psycopg2.Error) as error:
@@ -122,7 +129,7 @@ async def listUsers():
     try:
         usersArr = []
         cursor = connectPSQL()
-        query_search = """SELECT * from users"""
+        query_search = """SELECT * from users order by status desc"""
         cursor["cursor"].execute(query_search)
         users = cursor["cursor"].fetchall()
         for x in users:
