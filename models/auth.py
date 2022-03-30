@@ -1,21 +1,23 @@
+import hashlib
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
 from utilities.functions import encodePsw, decodePsw
 from utilities.validators import validSignup, validUpdateUser
+import json as jsonDec
 
 async def signup(request):
     try:
         valid = await validSignup(request)
         cursor = connectPSQL()
-        request["psw"]= encodePsw(request["psw"])
+        request["psw"]= hashlib.sha256(str(request["psw"]).encode()).hexdigest()
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
             record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V')
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             cursor["conn"].commit()
-            return json({"data":"Record inserted successfully into table","code":200},200)
+            return json({"data":"Usuario creado con éxito","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
@@ -24,7 +26,7 @@ async def signup(request):
 def login(request):
     try:
         cursor = connectPSQL()
-        request["psw"] = encodePsw(request["psw"])
+        request["psw"] = hashlib.sha256(str(request["psw"]).encode()).hexdigest()
         # print(str(request["psw"]))
         sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
 
@@ -81,7 +83,7 @@ async def updateUser(request):
                 sql_update_query = """Update users set dni_rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["dni_rif"],request["id"],))
             cursor["conn"].commit()
-            return json({"data":"Record Updated successfully","code":200},200)
+            return json({"data":"Usuario actualizado con éxito","code":200},200)
         return valid
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -113,7 +115,6 @@ async def readUser(request):
             return json({"data":{"user":{
                 "id":user[0],
                 "username": user[1],
-                "psw": str(decodePsw(user[2])),
                 "dni_rif": user[3],
                 "first_name": user[4],
                 "last_name": user[5],
@@ -123,7 +124,7 @@ async def readUser(request):
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        return json({"error":str(error),"code":500},500)
+        return json({"error":error,"code":500},500)
 
 async def listUsers():
     try:
