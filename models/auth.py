@@ -1,11 +1,10 @@
 import hashlib
+from os import curdir
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
-from utilities.functions import encodePsw, decodePsw
 from utilities.validators import validSignup, validUpdateUser
-import json as jsonDec
 
 async def signup(request):
     try:
@@ -175,3 +174,19 @@ async def searchUser(request):
         return json({"error":str(error),"code":500},500)
 
 
+async def updatePassword(request,data):
+    try:
+        cursor = connectPSQL()
+        query_search = """SELECT * from users WHERE id = %s AND psw= %s"""
+        cursor["cursor"].execute(query_search,(data,request["password"]))
+        user = cursor["cursor"].fetchone()
+        
+        if user:
+            sql_update_query = """Update users set psw = %s AND username=%s where id = %s"""
+            cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],data,))
+            cursor["conn"].commit()
+            return json({"data":"Contrasena actualizada con éxito","code":200},200)
+        else:
+            return json({"error":"Contrasena incorrecta, por favor verifique y vuelva a intentar","code":500},500)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)

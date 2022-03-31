@@ -40,3 +40,8 @@ async def ping(request: Request, token:Token):
 @jwt_required
 async def ping(request: Request, token:Token):
     return await auth.searchUser(request.json)
+
+@ar.route('/updatePassword', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token:Token):
+    return await auth.updatePassword(request.json,token.identity)

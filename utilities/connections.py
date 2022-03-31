@@ -22,7 +22,7 @@ def connectPSQL():
 # def connectPSQLLog():
 #     try:
 #         conn = psycopg2.connect(
-#             host="localhost",
+#             host="locddalhost",
 #             database="invoicing_system",
 #             user="admin",
 #             password="admin"
