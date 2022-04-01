@@ -174,18 +174,24 @@ async def searchUser(request):
         return json({"error":str(error),"code":500},500)
 
 
-async def updatePassword(request,data):
+async def updatePassword(request):
     try:
         cursor = connectPSQL()
+        request["password"]= hashlib.sha256(str(request["password"]).encode()).hexdigest()
         query_search = """SELECT * from users WHERE id = %s AND psw= %s"""
-        cursor["cursor"].execute(query_search,(data,request["password"]))
+        cursor["cursor"].execute(query_search,(request["id"],request["password"]))
         user = cursor["cursor"].fetchone()
         
         if user:
-            sql_update_query = """Update users set psw = %s AND username=%s where id = %s"""
-            cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],data,))
-            cursor["conn"].commit()
-            return json({"data":"Contrasena actualizada con éxito","code":200},200)
+            valid = await validUpdateUser(request)
+            if valid == True:
+                request["new_password"]= hashlib.sha256(str(request["new_password"]).encode()).hexdigest()
+                sql_update_query = """Update users set psw = %s , username=%s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],request["id"],))
+                cursor["conn"].commit()
+                return json({"data":"Contrasena actualizada con éxito","code":200},200)
+            else:
+                return valid
         else:
             return json({"error":"Contrasena incorrecta, por favor verifique y vuelva a intentar","code":500},500)
     except (Exception, psycopg2.Error) as error:

@@ -44,4 +44,4 @@ async def ping(request: Request, token:Token):
 @ar.route('/updatePassword', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token:Token):
-    return await auth.updatePassword(request.json,token.identity)
+    return await auth.updatePassword(request.json)

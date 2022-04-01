@@ -39,6 +39,12 @@ async def validUpdateUser(request):
                 search_user = cursor["cursor"].fetchone()
                 if search_user:
                     return json({"error":"Username no disponible","code":500},500)
+        if "dni_rif" in request:
+            if request["dni_rif"]!=user[3]:
+                dni_rif_query= """SELECT * FROM users WHERE dni_rif= %s"""
+                cursor['cursor'].execute(dni_rif_query,(request['dni_rif'],))
+                if cursor["cursor"].fetchone():
+                    return json({"error":"Ya existe un usuario con el mismo numero de dni_rif","code":500},500)
     return True
 
 async def validSupplierInfo(request):
