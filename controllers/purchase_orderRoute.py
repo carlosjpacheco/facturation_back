@@ -3,6 +3,7 @@ from sanic import Blueprint
 from models import purchase_order
 from sanic_jwt_extended.tokens import Token
 from sanic.request import Request
+from utilities import pdf
 
 po = Blueprint('purchase_order', url_prefix='/purchase_order')
 @po.route('/add', methods=['POST'])
@@ -29,3 +30,8 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return purchase_order.listPurchaseOrder()
+
+@po.route('/pdfPurchaseOrder', methods=['GET'])
+# @jwt_required
+def ping(request: Request):
+    return pdf.pdfPurchaseOrder()
