@@ -54,7 +54,7 @@ def login(request):
             else:
                 return json({"error":"Usuario Inactivo","code":500},500)
         else:
-            return json({"error":"Usuario o contrasena incorrecta","code":500},500)
+            return json({"error":"Usuario o contraseña incorrecta","code":500},500)
     except Exception as error:
         return json({"error":str(error),"code":500},500)
 
