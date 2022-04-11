@@ -15,25 +15,26 @@ from utilities.sendEmails import sendPurchaseOrder
 from reportlab.graphics.shapes import Drawing
  
 
-async def pdfPurchaseOrder():
+async def pdfPurchaseOrder(request):
     try:
         
-        products = [['CPU','200 pulgadas',20],['Monitores DELL','Estan lacras',20],['Mouse','Con lucesitas',15],['Teclado gamer','que tenga todas las letras',15]]
+        # products = [['CPU','200 pulgadas',20],['Monitores DELL','Estan lacras',20],['Mouse','Con lucesitas',15],['Teclado gamer','que tenga todas las letras',15]]
         answers = []
         answers2=[]
         answers3=[]
         Story = []
+        
         answers.append(['Datos del Cliente','Datos del Proveedor'])
-        answers2.append(['Nombre Completo:','The SoftWare House','Nombre:','El kiosco de carlitos'])
+        answers2.append(['Nombre Completo:','The SoftWare House','Nombre:',request["name"]])
         answers2.append(['DNI:','J-5526222','DNI:','J-22629292'])
-        answers2.append(['Dirección:','Casa Amarilla','Dirección:','Al lado'])
+        answers2.append(['Dirección:','Casa Amarilla','Dirección:',request["address"]])
         answers3.append(['Referencia','Producto','Descripsión','Unidades'])
-        for x in products:
+        for x in request["products"]:
             row = [str(uuid4())[-8:],x[0],x[1],x[2]]
             answers3.append(row)
 
 
-        doc = SimpleDocTemplate("/home/carlos/Desktop/tg/facturation_back/purchase_order.pdf", pagesize=letter,
+        doc = SimpleDocTemplate("purchase_order.pdf", pagesize=letter,
                         rightMargin=72, leftMargin=72,
                         topMargin=72, bottomMargin=18)
         estilo = getSampleStyleSheet()
@@ -55,7 +56,7 @@ async def pdfPurchaseOrder():
         Story.append(table)
         Story.append(table2)
         Story.append(Spacer(1, 12))
-        Story.append(Paragraph('Orden de Compra <strong># {id}</strong>'.format(id = 1234),estiloT))
+        Story.append(Paragraph('Orden de Compra <strong># {id}</strong>'.format(id = request["id"]),estiloT))
         Story.append(Spacer(1, 12))
         Story.append(table3)
 
