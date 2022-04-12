@@ -13,9 +13,9 @@ def sendPurchaseOrder():
 
         password = "26473558cj"
         message['From'] = 'carlosp@diemo.com.ve'
-        message['To'] = 'christianmaza23@gmail.com'
-        message['Subject']='Orden de Compra #{id}'.format(id =  1234)
-        message.attach(MIMEText("Eres un mariquito", 'plain'))
+        message['To'] = 'carlosp@diemo.com.ve'
+        message['Subject']="LoreBi"
+        message.attach(MIMEText("Orden de Compra #{id}".format(id =  1234), 'plain'))
         # create server
         server = smtplib.SMTP('smtp.gmail.com: 587')
         

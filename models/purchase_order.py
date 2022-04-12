@@ -11,6 +11,8 @@ async def addPurchaseOrder(request,data):
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
+            request["nro_order"]=131151
+
             query_noti = """INSERT INTO purchase_order (nro_order,id_user,date,completed,deleted) VALUES (%s,%s,%s,%s,%s)"""
             records = (request["nro_order"],request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,)
             cursor["cursor"].execute(query_noti,records)
@@ -47,7 +49,8 @@ async def readPurchaseOrder(request):
                 "nro_order":purchaseOrder[1],
                 "quantity":detailPurchaseOrder[1],
                 "description":detailPurchaseOrder[2],
-                "created_at":detailPurchaseOrder[3]
+                "created_at":detailPurchaseOrder[3],
+                "products":detailPurchaseOrder[5][0]
             },"code":200},200)    
         else:
             return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
@@ -110,9 +113,16 @@ async def listPurchaseOrder():
         purchaseOrders = cursor["cursor"].fetchall()
         if purchaseOrders:
             for x in purchaseOrders:
+                query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""
+                cursor["cursor"].execute(query_search,(x[0],))
+                purchaseOrdersDetails = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],
-                    "date":x[3]
+                    "date":x[3],
+                    "detail":{
+                        "quantity":purchaseOrdersDetails[1],
+                        "description":purchaseOrdersDetails[2]
+                    }
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)

@@ -34,4 +34,4 @@ def ping(request: Request, token : Token):
 @po.route('/pdfPurchaseOrder', methods=['GET'])
 # @jwt_required
 def ping(request: Request):
-    return pdf.pdfPurchaseOrder()
+    return pdf.pdfPurchaseOrder(request.json)
