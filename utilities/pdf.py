@@ -18,7 +18,6 @@ from reportlab.graphics.shapes import Drawing
 async def pdfPurchaseOrder(request):
     try:
         
-        products = {{'CPU','200 pulgadas',20},{'Monitores DELL','Estan lacras',20},{'Mouse','Con lucesitas',15},{'Teclado gamer','que tenga todas las letras',15}}
         answers = []
         answers2=[]
         answers3=[]

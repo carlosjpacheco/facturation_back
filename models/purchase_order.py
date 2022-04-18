@@ -11,10 +11,8 @@ async def addPurchaseOrder(request,data):
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
-            request["nro_order"]=131151
-
-            query_noti = """INSERT INTO purchase_order (nro_order,id_user,date,completed,deleted) VALUES (%s,%s,%s,%s,%s)"""
-            records = (request["nro_order"],request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,)
+            query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier) VALUES (%s,%s,%s,%s,%s)"""
+            records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,request["id_supplier"],)
             cursor["cursor"].execute(query_noti,records)
             cursor["conn"].commit()
             addPurchaseOrderDetail(request)
@@ -36,21 +34,26 @@ async def delpurchaseOrder(request):
 
 async def readPurchaseOrder(request):
     try:
+        product=[]
         cursor = connectPSQL()
-        cursor2 = connectPSQL()
         query_search = """SELECT * from purchase_order WHERE id = %s"""
-        query_search2 = """SELECT * from detail_purchase_order WHERE id_purchase_order = %s"""
         cursor["cursor"].execute(query_search,(request["id"],))
-        cursor2["cursor"].execute(query_search2,(request["id"],))
         purchaseOrder = cursor["cursor"].fetchone()
-        detailPurchaseOrder = cursor2["cursor"].fetchone()
+        query_search2 = """SELECT * from detail_purchase_order WHERE id_purchase_order = %s"""
+        cursor["cursor"].execute(query_search2,(request["id"],))
+        detailPurchaseOrder = cursor["cursor"].fetchone()
         if purchaseOrder:
+            for x in detailPurchaseOrder[3]:
+                products = {
+                    "product":x[0],
+                    "description":x[1],
+                    "amount":x[2]
+                }
+                product.append(products)
             return json({"data":{
                 "nro_order":purchaseOrder[1],
-                "quantity":detailPurchaseOrder[1],
-                "description":detailPurchaseOrder[2],
-                "created_at":detailPurchaseOrder[3],
-                "products":detailPurchaseOrder[5][0]
+                "created_at":detailPurchaseOrder[2],
+                "products":product
             },"code":200},200)    
         else:
             return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
@@ -58,12 +61,13 @@ async def readPurchaseOrder(request):
         return json({"error":str(error),"code":500},500)
 
 def addPurchaseOrderDetail(request):
+    
     cursor = connectPSQL()
-    query_search = """SELECT * from purchase_order WHERE nro_order = %s"""
-    cursor["cursor"].execute(query_search,(request["nro_order"],))
+    query_search = """SELECT * from purchase_order ORDER BY id DESC limit 1"""
+    cursor["cursor"].execute(query_search)
     purchaseOrder = cursor["cursor"].fetchone()
-    query_noti = """INSERT INTO detail_purchase_order (quantity,description,created_at,id_purchase_order) VALUES (%s,%s,%s,%s)"""
-    records = (request["quantity"],request["description"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),purchaseOrder[0])
+    query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
+    records = (purchaseOrder[0],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),request["products"])
     cursor["cursor"].execute(query_noti,records)
     cursor["conn"].commit()
 
@@ -112,13 +116,18 @@ async def listPurchaseOrder():
         cursor["cursor"].execute(query_search)
         purchaseOrders = cursor["cursor"].fetchall()
         if purchaseOrders:
+            print("hola")
             for x in purchaseOrders:
                 query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
                 purchaseOrdersDetails = cursor["cursor"].fetchone()
+                query_search2 = """SELECT * from supplier where id = %s"""
+                cursor["cursor"].execute(query_search2,(x[6],))
+                supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],
                     "date":x[3],
+                    "supplier":supplier[1],
                     "detail":{
                         "quantity":purchaseOrdersDetails[1],
                         "description":purchaseOrdersDetails[2]
