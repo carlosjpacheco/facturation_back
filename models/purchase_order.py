@@ -1,4 +1,5 @@
 from datetime import datetime
+from locale import currency
 import time
 from utilities.connections import connectPSQL
 import psycopg2
@@ -6,7 +7,7 @@ from sanic.response import json
 
 from utilities.validators import validPurchaseOrder
 
-async def addPurchaseOrder(request,data):
+async def addPurchaseOrder(request):
     try:
         valid = await validPurchaseOrder(request)
         if valid == True:
@@ -138,4 +139,21 @@ async def listPurchaseOrder():
         else:
             return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
     except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def listCurrency():
+    try:
+        currencyArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from currency"""
+        cursor["cursor"].execute(query_search)
+        currency = cursor["cursor"].fetchall()
+        for x in currency:
+            currencyJson = {
+                "id":x[0],
+                "name": x[1]
+            }
+            currencyArr.append(currencyJson)
+        return json({"data":currencyArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
