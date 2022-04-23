@@ -84,12 +84,12 @@ def listSuppliers():
                 "rif": x[2],
                 "name": x[1],
                 "email":x[5],
-                "status":x[10],
+                "status":x[7],
             }
             supplierArr.append(supplierJson)
         return json({"data":supplierArr,"code":200},200)
     except (Exception,psycopg2.Error) as error:
-        return json({"error":str(error),"code":500},500)
+        return json({"error":error,"code":500},500)
 
 def readSupplier(request):
     try:
