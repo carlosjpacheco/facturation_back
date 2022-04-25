@@ -7,11 +7,14 @@ from sanic.response import json
 
 from utilities.validators import validPurchaseOrder
 
-async def addPurchaseOrder(request):
+async def addPurchaseOrder(request,tok):
     try:
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
+            request["products"] = str(request["products"])
+            request["products"] = request["products"].replace("[","{")
+            request["products"] = request["products"].replace("]","}")
             query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier) VALUES (%s,%s,%s,%s,%s)"""
             records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,request["id_supplier"],)
             cursor["cursor"].execute(query_noti,records)
