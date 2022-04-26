@@ -7,11 +7,14 @@ from sanic.response import json
 
 from utilities.validators import validPurchaseOrder
 
-async def addPurchaseOrder(request):
+async def addPurchaseOrder(request,tok):
     try:
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
+            request["products"] = str(request["products"])
+            request["products"] = request["products"].replace("[","{")
+            request["products"] = request["products"].replace("]","}")
             query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
             records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,False,request["proveedor"],request["terms_conditions"],request["delivery_address"],request["currency"],)
             cursor["cursor"].execute(query_noti,records)
@@ -117,29 +120,25 @@ async def listPurchaseOrder():
         cursor["cursor"].execute(query_search)
         purchaseOrders = cursor["cursor"].fetchall()
         if purchaseOrders:
-            print("hola")
             for x in purchaseOrders:
                 query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
                 purchaseOrdersDetails = cursor["cursor"].fetchone()
                 query_search2 = """SELECT * from supplier where id = %s"""
-                cursor["cursor"].execute(query_search2,(x[6],))
+                cursor["cursor"].execute(query_search2,(x[5],))
                 supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],
-                    "date":x[3],
+                    "date":x[2],
                     "supplier":supplier[1],
-                    "detail":{
-                        "quantity":purchaseOrdersDetails[1],
-                        "description":purchaseOrdersDetails[2]
-                    }
+                    "products":purchaseOrdersDetails[3]
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
         else:
             return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        return json({"error":str(error),"code":500},500)
+        return json({"error":error,"code":500},500)
 
 async def listCurrency():
     try:
