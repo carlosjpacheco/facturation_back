@@ -12,8 +12,8 @@ async def addPurchaseOrder(request):
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
-            query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier) VALUES (%s,%s,%s,%s,%s)"""
-            records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,True,request["id_supplier"],)
+            query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
+            records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,False,request["proveedor"],request["terms_conditions"],request["delivery_address"],request["currency"],)
             cursor["cursor"].execute(query_noti,records)
             cursor["conn"].commit()
             addPurchaseOrderDetail(request)
