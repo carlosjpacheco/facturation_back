@@ -12,9 +12,7 @@ async def addPurchaseOrder(request,tok):
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
-            request["products"] = str(request["products"])
-            request["products"] = request["products"].replace("[","{")
-            request["products"] = request["products"].replace("]","}")
+            # request["products"] = str(request["products"])
             query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
             records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,False,request["proveedor"],request["terms_conditions"],request["delivery_address"],request["currency"],)
             cursor["cursor"].execute(query_noti,records)
@@ -66,12 +64,24 @@ async def readPurchaseOrder(request):
 
 def addPurchaseOrderDetail(request):
     
+    product_list = []
+    for val in request["products"]:
+        list_val = []
+        list_val.append(val["name"])
+        list_val.append(val["description"])
+        list_val.append(val["quantity"])
+        product_list.append(list_val)
+    
+    products = str(product_list)     
+    products.replace("[","{")
+    products.replace("]","}")
+    
     cursor = connectPSQL()
     query_search = """SELECT * from purchase_order ORDER BY id DESC limit 1"""
     cursor["cursor"].execute(query_search)
     purchaseOrder = cursor["cursor"].fetchone()
     query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
-    records = (purchaseOrder[0],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),request["products"])
+    records = (purchaseOrder[0],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),products,)
     cursor["cursor"].execute(query_noti,records)
     cursor["conn"].commit()
 
