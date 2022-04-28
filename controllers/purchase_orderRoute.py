@@ -9,7 +9,7 @@ po = Blueprint('purchase_order', url_prefix='/purchase_order')
 @po.route('/add', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return purchase_order.addPurchaseOrder(request.json,token.identity)
+    return purchase_order.addPurchaseOrder(request.json)
 
 @po.route('/del', methods=['POST'])
 @jwt_required
