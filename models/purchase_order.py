@@ -82,12 +82,12 @@ def addPurchaseOrderDetail(request):
     purchaseOrder = cursor["cursor"].fetchone()
     
     query_search = """SELECT * from supplier WHERE id = %s"""
-    cursor["cursor"].execute(query_search,(request["id"],))
+    cursor["cursor"].execute(query_search,(request["supplier"],))
     supplier = cursor["cursor"].fetchone()
 
     ruta = f"ORD_Nro{purchaseOrder[0]}_{supplier[1]}"
 
-    sql_update = """Update supplier set ruta=%s where id = %s"""
+    sql_update = """Update purchase_order set ruta=%s where id = %s"""
     cursor["cursor"].execute(sql_update,(ruta,purchaseOrder[0],))
     
     query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
