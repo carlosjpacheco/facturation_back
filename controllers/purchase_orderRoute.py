@@ -34,6 +34,7 @@ def ping(request: Request, token : Token):
 @po.route('/pdfPurchaseOrder', methods=['GET'])
 # @jwt_required
 def ping(request: Request):
+
     return pdf.pdfPurchaseOrder(request.json)
 
 @po.route('/currency', methods=['GET'])
@@ -41,8 +42,8 @@ def ping(request: Request):
 async def ping(request: Request, token:Token):
     return await purchase_order.listCurrency()
 
-@po.route('/pdf', methods=['GET'])
+@po.route('/showPDF', methods=['GET'])
 # @jwt_required
 def ping(request: Request):
-    print(request.json)
+    
     return pdf.showPDF(request.json)
