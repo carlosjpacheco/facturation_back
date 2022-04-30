@@ -1,4 +1,5 @@
 from datetime import datetime
+from importlib.resources import path
 from locale import currency
 import time
 from utilities.connections import connectPSQL
@@ -6,18 +7,24 @@ import psycopg2
 from sanic.response import json
 
 from utilities.validators import validPurchaseOrder
+from utilities.pdf import pdfPurchaseOrder
 
 async def addPurchaseOrder(request):
     try:
         valid = await validPurchaseOrder(request)
         if valid == True:
             cursor = connectPSQL()
-            query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,ruta) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-            records = (request["id_user"],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),False,False,request["proveedor"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
-            cursor["cursor"].execute(query_noti,records)
-            cursor["conn"].commit()
-            addPurchaseOrderDetail(request)
-            return json({"data":"Orden de compra creada","code":200},200)
+            if request["preview"] == False:
+                print(type(request["date"]))
+                query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                records = (request["id_user"],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
+                cursor["cursor"].execute(query_noti,records)
+                cursor["conn"].commit()
+                await addPurchaseOrderDetail(request)
+                return json({"data":"Orden de compra creada","code":200},200)
+            else:
+                await pdfPurchaseOrder(request)
+                return json({"data":"ok","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
@@ -61,37 +68,39 @@ async def readPurchaseOrder(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-def addPurchaseOrderDetail(request):
-    
-    product_list = []
+async def addPurchaseOrderDetail(request):
+    products_list = []
     for val in request["products"]:
         list_val = []
         list_val.append(val["name"])
         list_val.append(val["description"])
         list_val.append(val["quantity"])
-        product_list.append(list_val)
+        products_list.append(list_val)
     
-    products = str(product_list)     
-    products.replace("[","{")
-    products.replace("]","}")
+    products = str(products_list)  
+    products = products.replace("[","{")
+    products= products.replace("]","}")
     
     cursor = connectPSQL()
     
     query_search = """SELECT * from purchase_order ORDER BY id DESC limit 1"""
     cursor["cursor"].execute(query_search)
     purchaseOrder = cursor["cursor"].fetchone()
-    
+    request["nro_order"] = purchaseOrder[0]
+
     query_search = """SELECT * from supplier WHERE id = %s"""
     cursor["cursor"].execute(query_search,(request["supplier"],))
     supplier = cursor["cursor"].fetchone()
+    request["products"]= products_list
+    await pdfPurchaseOrder(request)
 
-    ruta = f"ORD_Nro{purchaseOrder[0]}_{supplier[1]}"
+    path = f"ORD_Nro{purchaseOrder[0]}_{supplier[1]}"
 
-    sql_update = """Update purchase_order set ruta=%s where id = %s"""
-    cursor["cursor"].execute(sql_update,(ruta,purchaseOrder[0],))
+    sql_update = """Update purchase_order set path=%s where id = %s"""
+    cursor["cursor"].execute(sql_update,(path,purchaseOrder[0],))
     
     query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
-    records = (purchaseOrder[0],datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),products,)
+    records = (purchaseOrder[0],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),products,)
     cursor["cursor"].execute(query_noti,records)
 
     cursor["conn"].commit()
@@ -146,7 +155,7 @@ async def listPurchaseOrder():
                 cursor["cursor"].execute(query_search,(x[0],))
                 purchaseOrdersDetails = cursor["cursor"].fetchone()
                 query_search2 = """SELECT * from supplier where id = %s"""
-                cursor["cursor"].execute(query_search2,(x[5],))
+                cursor["cursor"].execute(query_search2,(x[4],))
                 supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],

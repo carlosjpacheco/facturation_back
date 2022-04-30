@@ -9,7 +9,7 @@ po = Blueprint('purchase_order', url_prefix='/purchase_order')
 @po.route('/add', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return purchase_order.addPurchaseOrder(request.json,token.identity)
+    return purchase_order.addPurchaseOrder(request.json)
 
 @po.route('/del', methods=['POST'])
 @jwt_required
@@ -40,3 +40,9 @@ def ping(request: Request):
 @jwt_required
 async def ping(request: Request, token:Token):
     return await purchase_order.listCurrency()
+
+@po.route('/pdf', methods=['GET'])
+# @jwt_required
+def ping(request: Request):
+    print(request.json)
+    return pdf.showPDF(request.json)

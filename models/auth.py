@@ -32,7 +32,6 @@ def login(request):
         cursor["cursor"].execute(sql_select_query, (request["username"],str(request["psw"]),))
 
         user = cursor["cursor"].fetchone()
-        print(user)
         if user:
             if user[8] == True:
                 return json(
