@@ -153,9 +153,8 @@ async def listPurchaseOrder():
             for x in purchaseOrders:
                 query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
-                purchaseOrdersDetails = cursor["cursor"].fetchone()
                 query_search2 = """SELECT * from supplier where id = %s"""
-                cursor["cursor"].execute(query_search2,(x[4],))
+                cursor["cursor"].execute(query_search2,(x[5],))
                 supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],
