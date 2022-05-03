@@ -16,10 +16,10 @@ import shutil
 import os
 url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
 
-async def pdfPurchaseOrder(request):
+async def pdfPurchaseOrder(request,data):
     try:
-        if os.path.exists("PDFs/purchase_order_preview.pdf"):
-            os.remove("PDFs/purchase_order_preview.pdf")
+        if os.path.exists(url_to_move+"ORD_nro_{name}_preview.pdf".format(name=data)):
+            os.remove(url_to_move+"ORD_nro_{name}_preview.pdf".format(name=data))
 
         cursor = connectPSQL()
         query_search = """SELECT * from supplier WHERE id = %s"""
@@ -40,7 +40,7 @@ async def pdfPurchaseOrder(request):
 
         print("paso paso")
         if request["preview"]==True:
-            doc = SimpleDocTemplate("purchase_order_preview.pdf", pagesize=letter,
+            doc = SimpleDocTemplate(url_to_move+"ORD_nro_{name}_preview.pdf".format(name=data), pagesize=letter,
                             rightMargin=72, leftMargin=72,
                             topMargin=72, bottomMargin=18)
         else:

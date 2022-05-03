@@ -9,7 +9,7 @@ from sanic.response import json
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
 
-async def addPurchaseOrder(request):
+async def addPurchaseOrder(request,data):
     try:
         valid = await validPurchaseOrder(request)
         if valid == True:
@@ -20,10 +20,10 @@ async def addPurchaseOrder(request):
                 records = (request["id_user"],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 cursor["cursor"].execute(query_noti,records)
                 cursor["conn"].commit()
-                await addPurchaseOrderDetail(request)
+                await addPurchaseOrderDetail(request,data)
                 return json({"data":"Orden de compra creada","code":200},200)
             else:
-                await pdfPurchaseOrder(request)
+                await pdfPurchaseOrder(request,data)
                 return json({"data":"ok","code":200},200)
         else:
             return valid
@@ -68,7 +68,7 @@ async def readPurchaseOrder(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def addPurchaseOrderDetail(request):
+async def addPurchaseOrderDetail(request,data):
     products_list = []
     for val in request["products"]:
         list_val = []
@@ -92,7 +92,7 @@ async def addPurchaseOrderDetail(request):
     cursor["cursor"].execute(query_search,(request["supplier"],))
     supplier = cursor["cursor"].fetchone()
     request["products"]= products_list
-    await pdfPurchaseOrder(request)
+    await pdfPurchaseOrder(request,data)
 
     path = f"ORD_Nro{purchaseOrder[0]}_{supplier[1]}"
 
