@@ -14,7 +14,8 @@ from utilities.connections import connectPSQL
 from utilities.sendEmails import sendPurchaseOrder
 import shutil 
 import os
-url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+# url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
 
 async def pdfPurchaseOrder(request):
     try:
@@ -38,7 +39,6 @@ async def pdfPurchaseOrder(request):
             row = [str(uuid4())[-8:],x[0],x[1],x[2]]
             answers3.append(row)
 
-        print("paso paso")
         if request["preview"]==True:
             doc = SimpleDocTemplate("purchase_order_preview.pdf", pagesize=letter,
                             rightMargin=72, leftMargin=72,
@@ -62,7 +62,7 @@ async def pdfPurchaseOrder(request):
         table.setStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')])
         table2.setStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')])
         table3.setStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')])
-        print("ESTAMOS QAUUU")
+
         Story.append(table)
         Story.append(table2)
         Story.append(Spacer(1, 12))

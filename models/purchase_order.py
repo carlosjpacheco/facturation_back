@@ -15,7 +15,6 @@ async def addPurchaseOrder(request):
         if valid == True:
             cursor = connectPSQL()
             if request["preview"] == False:
-                print(type(request["date"]))
                 query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (request["id_user"],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 cursor["cursor"].execute(query_noti,records)
@@ -88,13 +87,13 @@ async def addPurchaseOrderDetail(request):
     purchaseOrder = cursor["cursor"].fetchone()
     request["nro_order"] = purchaseOrder[0]
 
-    query_search = """SELECT * from supplier WHERE id = %s"""
-    cursor["cursor"].execute(query_search,(request["supplier"],))
-    supplier = cursor["cursor"].fetchone()
+    # query_search = """SELECT * from supplier WHERE id = %s"""
+    # cursor["cursor"].execute(query_search,(request["supplier"],))
+    # supplier = cursor["cursor"].fetchone()
     request["products"]= products_list
     await pdfPurchaseOrder(request)
 
-    path = f"ORD_Nro{purchaseOrder[0]}_{supplier[1]}"
+    path = f"ORD_Nro{purchaseOrder[0]}"
 
     sql_update = """Update purchase_order set path=%s where id = %s"""
     cursor["cursor"].execute(sql_update,(path,purchaseOrder[0],))
@@ -154,13 +153,13 @@ async def listPurchaseOrder():
                 query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
                 query_search2 = """SELECT * from supplier where id = %s"""
-                cursor["cursor"].execute(query_search2,(x[5],))
+                cursor["cursor"].execute(query_search2,(x[4],))
                 supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
                     "nro_order":x[1],
                     "date":x[2],
                     "supplier":supplier[1],
-                    "ruta": x[9]
+                    "ruta": x[8]
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
