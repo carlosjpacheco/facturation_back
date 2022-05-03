@@ -87,9 +87,6 @@ async def addPurchaseOrderDetail(request,data):
     purchaseOrder = cursor["cursor"].fetchone()
     request["nro_order"] = purchaseOrder[0]
 
-    # query_search = """SELECT * from supplier WHERE id = %s"""
-    # cursor["cursor"].execute(query_search,(request["supplier"],))
-    # supplier = cursor["cursor"].fetchone()
     request["products"]= products_list
     await pdfPurchaseOrder(request,data)
 
