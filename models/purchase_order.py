@@ -16,14 +16,13 @@ async def addPurchaseOrder(request,data):
             cursor = connectPSQL()
             if request["preview"] == False:
                 query_noti = """INSERT INTO purchase_order (id_user,date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["id_user"],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
+                records = (request["id_user"],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"]["id"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 cursor["cursor"].execute(query_noti,records)
                 cursor["conn"].commit()
                 await addPurchaseOrderDetail(request,data)
                 return json({"data":"Orden de compra creada","code":200},200)
             else:
-                await pdfPurchaseOrder(request,data)
-                return json({"data":"ok","code":200},200)
+                return await pdfPurchaseOrder(request,data)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
@@ -75,6 +74,7 @@ async def addPurchaseOrderDetail(request,data):
         list_val.append(val["description"])
         list_val.append(val["quantity"])
         products_list.append(list_val)
+    request["products"]= products_list
     
     products = str(products_list)  
     products = products.replace("[","{")
@@ -87,7 +87,6 @@ async def addPurchaseOrderDetail(request,data):
     purchaseOrder = cursor["cursor"].fetchone()
     request["nro_order"] = purchaseOrder[0]
 
-    request["products"]= products_list
     await pdfPurchaseOrder(request,data)
 
     path = f"ORD_Nro{purchaseOrder[0]}"
@@ -153,7 +152,7 @@ async def listPurchaseOrder():
                 cursor["cursor"].execute(query_search2,(x[5],))
                 supplier = cursor["cursor"].fetchone()
                 purchaseOrdersJson = {
-                    "nro_order":x[1],
+                    "nro_order":x[0],
                     "date":x[2],
                     "supplier":supplier[1],
                     "ruta": x[8]
