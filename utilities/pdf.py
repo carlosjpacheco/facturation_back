@@ -20,7 +20,7 @@ url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
 async def pdfPurchaseOrder(request,data):
     print(request)
     try:
-
+        uidPDF = str(uuid4)[-5:]
         cursor = connectPSQL()
         query_search = """SELECT * from supplier WHERE id = %s"""
         cursor["cursor"].execute(query_search,(request["supplier"]["id"],))
@@ -105,8 +105,8 @@ async def pdfPurchaseOrder(request,data):
         doc.build(Story)
         # sendPurchaseOrder()  
         if request["preview"]==True:  
-            shutil.move("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]),url_to_move)
-            return await showPDF("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]))
+            shutil.move("ORD_nro_{name}_{supplier}_{uid}_preview.pdf".format(name=data,supplier=supplier[0]),uid= uidPDF)
+            return await showPDF("ORD_nro_{name}_{supplier}_{uid}_preview.pdf".format(name=data,supplier=supplier[0]),uid= uidPDF)
         else:
             shutil.move("ORD_nro_{name}.pdf".format(name=request["nro_order"]),url_to_move)
             return await showPDF("ORD_nro_{name}.pdf".format(name=request["nro_order"]))
@@ -118,7 +118,7 @@ async def showPDF(request):
     try:
         archivo = request
         ruta= f"PDFs/{archivo}"
-        return json({"data":ruta,"code":200},200)
+        return json({"data":archivo,"code":200},200)
 
     except Exception as error:
         print(error)
