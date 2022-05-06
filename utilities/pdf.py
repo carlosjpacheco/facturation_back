@@ -18,12 +18,11 @@ url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
 # url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
 
 async def pdfPurchaseOrder(request,data):
-    print(request)
     try:
         uidPDF = str(uuid4)[-5:]
         cursor = connectPSQL()
         query_search = """SELECT * from supplier WHERE id = %s"""
-        cursor["cursor"].execute(query_search,(request["supplier"]["id"],))
+        cursor["cursor"].execute(query_search,(request["supplier"],))
         supplier = cursor["cursor"].fetchone()
         answers = []
         answers2=[]
@@ -98,15 +97,15 @@ async def pdfPurchaseOrder(request,data):
         Story.append(Spacer(1, 20))
         Story.append(Paragraph('<strong>Términos y condiciones: </strong>{terms_conditions}'.format(terms_conditions= request["terms_conditions"]),estiloN))
         Story.append(Spacer(1, 20))
-        Story.append(Paragraph('<strong>Moneda de pago: </strong>{terms_conditions}'.format(terms_conditions= request["currency"]["name"]),estiloN))
+        Story.append(Paragraph('<strong>Moneda de pago: </strong>{terms_conditions}'.format(terms_conditions= request["currency"]),estiloN))
 
         Story.append(Spacer(1, 20))
         Story.append(Paragraph('<strong>Firma de receptor: ___________________</strong> ',estilosfirma))  
         doc.build(Story)
         # sendPurchaseOrder()  
         if request["preview"]==True:  
-            shutil.move("ORD_nro_{name}_{supplier}_{uid}_preview.pdf".format(name=data,supplier=supplier[0]),uid= uidPDF)
-            return await showPDF("ORD_nro_{name}_{supplier}_{uid}_preview.pdf".format(name=data,supplier=supplier[0]),uid= uidPDF)
+            shutil.move("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]),url_to_move)
+            return await showPDF("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]))
         else:
             shutil.move("ORD_nro_{name}.pdf".format(name=request["nro_order"]),url_to_move)
             return await showPDF("ORD_nro_{name}.pdf".format(name=request["nro_order"]))
