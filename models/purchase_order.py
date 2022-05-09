@@ -155,7 +155,7 @@ async def listPurchaseOrder():
                     "nro_order":x[0],
                     "date":x[2],
                     "supplier":supplier[1],
-                    "path": x[10]
+                    "path": x[8]
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
