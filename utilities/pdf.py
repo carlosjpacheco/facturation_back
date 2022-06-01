@@ -14,8 +14,8 @@ from utilities.connections import connectPSQL
 from utilities.sendEmails import sendPurchaseOrder
 import shutil 
 import os
-url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
-# url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
+# url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
 
 async def pdfPurchaseOrder(request,data):
     try:
@@ -24,6 +24,9 @@ async def pdfPurchaseOrder(request,data):
         query_search = """SELECT * from supplier WHERE id = %s"""
         cursor["cursor"].execute(query_search,(request["supplier"],))
         supplier = cursor["cursor"].fetchone()
+        query_search2 = """SELECT * from currency WHERE id = %s"""
+        cursor["cursor"].execute(query_search2,(request["currency"],))
+        currency = cursor["cursor"].fetchone()
         answers = []
         answers2=[]
         answers3=[]
@@ -97,7 +100,7 @@ async def pdfPurchaseOrder(request,data):
         Story.append(Spacer(1, 20))
         Story.append(Paragraph('<strong>Términos y condiciones: </strong>{terms_conditions}'.format(terms_conditions= request["terms_conditions"]),estiloN))
         Story.append(Spacer(1, 20))
-        Story.append(Paragraph('<strong>Moneda de pago: </strong>{terms_conditions}'.format(terms_conditions= request["currency"]),estiloN))
+        Story.append(Paragraph('<strong>Moneda de pago: </strong>{currency}'.format(currency= currency[1]),estiloN))
 
         Story.append(Spacer(1, 20))
         Story.append(Paragraph('<strong>Firma de receptor: ___________________</strong> ',estilosfirma))  
@@ -116,7 +119,6 @@ async def pdfPurchaseOrder(request,data):
 async def showPDF(request):
     try:
         archivo = request
-        ruta= f"PDFs/{archivo}"
         return json({"data":archivo,"code":200},200)
 
     except Exception as error:

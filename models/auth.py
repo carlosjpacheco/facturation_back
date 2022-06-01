@@ -150,6 +150,27 @@ async def listUsers():
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
+async def listUsersOrder():
+    try:
+        usersArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from users where id_role = 3 order by status desc"""
+        cursor["cursor"].execute(query_search)
+        users = cursor["cursor"].fetchall()
+        for x in users:
+            query_search = """SELECT COUNT(id) from purchase_order WHERE id_user = %s """
+            cursor["cursor"].execute(query_search,(x[0],))
+            orders = cursor["cursor"].fetchone()
+            usersJson = {
+                "id":x[0],
+                "name": x[4]+" "+x[5],
+                "orders": orders[0]
+            }
+            usersArr.append(usersJson)
+        return json({"data":usersArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
 
 async def searchUser(request):
     try:
