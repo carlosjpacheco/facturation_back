@@ -84,7 +84,7 @@ def listSuppliers():
                 "rif": x[2],
                 "name": x[1],
                 "email":x[5],
-                "status":x[7],
+                "status":x[10],
             }
             supplierArr.append(supplierJson)
         return json({"data":supplierArr,"code":200},200)
