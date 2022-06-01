@@ -1,13 +1,17 @@
+import imp
 from sanic_jwt_extended import tokens
 from sanic_jwt_extended.decorators import jwt_required
 from sanic import Blueprint
+import sanic_openapi
 from models import auth
 from sanic_jwt_extended.tokens import Token
 from sanic.request import Request
+from sanic_openapi import doc
 
 ar = Blueprint('auth', url_prefix='/auth')
 
 @ar.route('/signup', methods=['POST'])
+@doc.summary("Registrar usuario")
 @jwt_required
 async def ping(request: Request, token : Token):
     return await auth.signup(request.json)

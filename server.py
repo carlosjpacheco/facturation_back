@@ -10,18 +10,26 @@ from sanic_jwt_extended import JWT
 from datetime import timedelta
 from sanic_scheduler import SanicScheduler
 from sanic.log import logger
-from models.auth import signup,login
+from sanic_openapi import openapi2_blueprint
+
 
 app = Sanic("TG")
 app.blueprint(api)
+app.blueprint(openapi2_blueprint)
 scheduler = SanicScheduler(app)
 CORS(app, automatic_options=True)
+
+#####swagger configuration###############
+app.config.API_HOST = "192.168.0.135:7600"
+app.config.API_VERSION = "0.0.1"
+app.config.API_TITLE = "LoreBI | Facturation System"
+app.config.API_DESCRIPTION = ""
 
 app.error_handler.add(PyMongoError, mongo_exception)
 app.error_handler.add(ServerError, server_error_handler)
 
-app.config.RESPONSE_TIMEOUT = 400000000000
-app.config.REQUEST_TIMEOUT = 400000000000
+app.config.RESPONSE_TIMEOUT = 4000
+app.config.REQUEST_TIMEOUT = 4000
 with JWT.initialize(app) as manager:
     manager.config.access_token_expires = timedelta(hours=5)
     manager.config.refresh_token_expires = timedelta(weeks=1)
