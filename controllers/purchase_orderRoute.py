@@ -32,6 +32,11 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return purchase_order.listPurchaseOrder()
 
+@po.route('/productsSelect', methods=['GET'])
+# @jwt_required
+def ping(request: Request):
+    return purchase_order.selectProducts()
+
 @po.route('/pdfPurchaseOrder', methods=['GET'])
 # @jwt_required
 def ping(request: Request):

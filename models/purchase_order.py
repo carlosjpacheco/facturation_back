@@ -167,3 +167,18 @@ async def listCurrency():
         return json({"data":currencyArr,"code":200},200)
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
+
+async def selectProducts():
+    try:
+        product=[]
+        cursor = connectPSQL()
+        query = """SELECT products from detail_purchase_order"""
+        cursor['cursor'].execute(query)
+        products = cursor['cursor'].fetchall()
+        for x in products:
+            prod=x[0][0][0][1:-1]
+            if prod not in product:
+                product.append(prod)
+        return json({"data":product,"code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({'error':str(error),'code':500},500)
