@@ -1,4 +1,3 @@
-import imp
 from sanic_jwt_extended import tokens
 from sanic_jwt_extended.decorators import jwt_required
 from sanic import Blueprint
