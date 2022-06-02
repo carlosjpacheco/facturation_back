@@ -117,16 +117,14 @@ async def listInvoices():
         invoices = cursor["cursor"].fetchall()
         if invoices:
             for x in invoices:
-                query_search = """SELECT * from status WHERE id = %s"""
+                query_search = """SELECT * from invoices_status WHERE id = %s"""
                 cursor["cursor"].execute(query_search,(x[4],))
                 status = cursor["cursor"].fetchone()
                 invoicesJson = {
-                    "nro_invoices":x[1],
+                    "nro_invoice":x[1],
                     "total":x[3],
                     "status":status[1],
-                    "paid":x[6],
                     "date":x[9],
-                    "deleted":x[8]
                 }
                 invoicesArr.append(invoicesJson)
             return json({"data":invoicesArr,"code":200},200)
