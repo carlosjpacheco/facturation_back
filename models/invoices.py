@@ -112,6 +112,7 @@ async def listInvoices():
     try:
         cursor = connectPSQL()
         invoicesArr = []
+        details = []
         query_search = """SELECT * from invoices"""
         cursor["cursor"].execute(query_search)
         invoices = cursor["cursor"].fetchall()
@@ -120,11 +121,17 @@ async def listInvoices():
                 query_search = """SELECT * from invoices_status WHERE id = %s"""
                 cursor["cursor"].execute(query_search,(x[4],))
                 status = cursor["cursor"].fetchone()
+                query_search = """SELECT * from invoice_detail WHERE id_invoice = %s"""
+                cursor["cursor"].execute(query_search,(x[0],))
+                detail = cursor["cursor"].fetchall()
+                for y in detail:
+                    details.append({'amount':y[1],'product':y[2],'quantity':y[3]})
                 invoicesJson = {
                     "nro_invoice":x[1],
                     "total":x[3],
                     "status":status[1],
                     "date":x[9],
+                    "products":details
                 }
                 invoicesArr.append(invoicesJson)
             return json({"data":invoicesArr,"code":200},200)

@@ -18,8 +18,8 @@ async def payment():
         "payer": {
             "payment_method": "paypal"},
         "redirect_urls": {
-            "return_url": "http://localhost:3000/payment/execute",
-            "cancel_url": "http://localhost:3000/"},
+            "return_url": "http://localhost:7650/payment/execute",
+            "cancel_url": "http://localhost:7650/"},
         "transactions": [{
             "item_list": {
                 "items": [{
