@@ -158,7 +158,11 @@ async def listUsersOrder():
         cursor["cursor"].execute(query_search)
         users = cursor["cursor"].fetchall()
         for x in users:
-            query_search = """SELECT COUNT(id) from purchase_order WHERE id_user = %s """
+            query_search = """SELECT COUNT(ord.id)
+                                from purchase_order ord
+                                WHERE ord.id_user = %s
+                                and ord.id not in (SELECT id_purchase_order
+                                FROM invoices); """
             cursor["cursor"].execute(query_search,(x[0],))
             orders = cursor["cursor"].fetchone()
             usersJson = {
@@ -167,6 +171,7 @@ async def listUsersOrder():
                 "orders": orders[0]
             }
             usersArr.append(usersJson)
+            usersArr.sort(key=lambda p: p['orders'])
         return json({"data":usersArr,"code":200},200)
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
