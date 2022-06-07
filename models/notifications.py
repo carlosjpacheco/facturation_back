@@ -24,12 +24,19 @@ def updateNotification(request,data):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-def listNotifications(data):
+async def listNotifications(data):
     try:
+        notifications = []
         cursor = connectPSQL()
-        query_search = """SELECT * from notifications WHERE source = %s"""
-        cursor["cursor"].execute(query_search)
-        invoices = cursor["cursor"].fetchall()
-
+        query_search = """SELECT * from notifications WHERE destination = %s"""
+        cursor["cursor"].execute(query_search,(data,))
+        noti = cursor["cursor"].fetchall()
+        for x in noti:
+            notifications.append({
+                'description':x[1],
+                'date':x[5],
+                'read':x[3]
+            })
+        return json({"data":notifications,"code":200},200)
     except(Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

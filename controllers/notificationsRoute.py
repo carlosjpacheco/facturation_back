@@ -15,3 +15,8 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return notifications.updateNotification(request.json,token.identity)
+
+@n.route('/list', methods=['GET'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await notifications.listNotifications(token.identity)

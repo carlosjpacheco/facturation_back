@@ -79,9 +79,9 @@ def login(request):
                     sql_update_query = """Update users set attemp = %s,status = %s where username = %s"""
                     cursor["cursor"].execute(sql_update_query, ((user[10]+1),False,request["username"]))
                     cursor["conn"].commit()
-                    return json({"error":"Su usuario se ha bloqueado y se le envio un correo con su contraseña, notificar al supervisor para activar el usuario","code":500},500)
+                    return json({"error":"Su usuario se ha bloqueado, notificar al supervisor para activar el usuario","code":500},500)
                 elif user[10]==10:
-                    return json({"error":"Su usuario se ha bloqueado y se le envio un correo con su contraseña, notificar al supervisor para activar el usuario","code":500},500)
+                    return json({"error":"Su usuario se ha bloqueado, notificar al supervisor para activar el usuario","code":500},500)
                 else:
                     sql_update_query = """Update users set attemp = %s where username = %s"""
                     cursor["cursor"].execute(sql_update_query, ((user[10]+1),request["username"]))
