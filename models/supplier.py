@@ -1,3 +1,4 @@
+from datetime import datetime
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
@@ -15,6 +16,9 @@ async def addSupplier(request):
                                 request["email"],request["contact_name"],request["contact_lastname"],request["contact_email"],
                                 request["contact_phone"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
+            query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+            records_history = ('Registro un Nuevo Proveedor',request["user_created"],datetime.now(),)
+            cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
             return json({"data":"Proveedor agregado con éxito","supplier":{   
                 "rif":request["rif"],
@@ -33,6 +37,9 @@ def deleteSupplier(request):
             status = True
         sql_delete_query = """Update supplier set status=%s where id = %s"""
         cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
+        query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+        records_history = ('Inactivo un Proveedor',request["user_created"],datetime.now(),)
+        cursor["cursor"].execute(query_history,records_history)
         cursor["conn"].commit()
         return json({"data":"Proveedor eliminado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
@@ -50,6 +57,9 @@ async def updateSupplier(request):
                                                 request["phone"],request["email"],request["contact_name"],
                                                 request["contact_lastname"],request["contact_email"],
                                                 request["contact_phone"],request["id"],))
+            query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+            records_history = ('Actualizo al Proveedor '+request["name"],request["user_created"],datetime.now(),)
+            cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
             return json({"data":"Usuario modificado con éxito","code":200},200)
         else:

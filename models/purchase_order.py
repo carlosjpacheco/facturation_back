@@ -15,10 +15,12 @@ async def addPurchaseOrder(request,data):
         if valid == True:
             cursor = connectPSQL()
             if request["preview"] == False:
-                print(datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 query_noti = """INSERT INTO purchase_order (date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 cursor["cursor"].execute(query_noti,records)
+                query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+                records_history = ('Generó una Nueva Orden de Compra',request["user_created"],datetime.now(),)
+                cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
                 await addPurchaseOrderDetail(request,data)
                 return json({"data":"Orden de compra creada","code":200,"pdf":1},200)

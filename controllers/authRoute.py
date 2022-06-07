@@ -34,10 +34,20 @@ async def ping(request: Request, token:Token):
 async def ping(request: Request, token:Token):
     return await auth.listUsersOrder()
 
+@ar.route('/UserOrderRandom', methods=['GET'])
+@jwt_required
+async def ping(request: Request, token:Token):
+    return await auth.UserRandomOrder()
+
 @ar.route('/read', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token:Token):
     return await auth.readUser(request.json)
+
+@ar.route('/history', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token:Token):
+    return await auth.listUsersHistory(request.json)
 
 @ar.route('/delete', methods=['POST'])
 @jwt_required

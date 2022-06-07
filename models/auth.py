@@ -1,3 +1,4 @@
+from datetime import datetime
 import hashlib
 from os import curdir
 from sanic_jwt_extended import JWT
@@ -15,6 +16,9 @@ async def signup(request):
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
             record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V')
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
+            query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+            records_history = ('Agregó un Nuevo Usuario',request["user_created"],datetime.now(),)
+            cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
             return json({"data":"Usuario creado con éxito","code":200},200)
         else:
@@ -81,6 +85,9 @@ async def updateUser(request):
             if "dni_rif" in request:
                 sql_update_query = """Update users set dni_rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["dni_rif"],request["id"],))
+            query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+            records_history = ('Actualizo el Usuario '+request["username"],request["user_created"],datetime.now(),)
+            cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
             return json({"data":"Usuario actualizado con éxito","code":200},200)
         return valid
@@ -96,6 +103,9 @@ async def deleteUser(request):
             status = True
         sql_delete_query = """Update users set status=%s where id = %s"""
         cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
+        query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+        records_history = ('Inactivó un Usuario',request["user_created"],datetime.now(),)
+        cursor["cursor"].execute(query_history,records_history)
         cursor["conn"].commit()
         return json({"data":"Usuario eliminado","code":200},200)
     except (Exception, psycopg2.Error) as error:
@@ -150,6 +160,24 @@ async def listUsers():
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
+async def listUsersHistory(request):
+    try:
+        usersArrhistory = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from operation_history where id_user = %s order by date desc"""
+        cursor["cursor"].execute(query_search,(request['id'],))
+        history = cursor["cursor"].fetchall()
+        for x in history:
+            historyJson = {
+                "id":x[0],
+                "description": x[1],
+                "date": x[3].timestamp()
+            }
+            usersArrhistory.append(historyJson)
+        return json({"data":usersArrhistory,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
 async def listUsersOrder():
     try:
         usersArr = []
@@ -173,6 +201,33 @@ async def listUsersOrder():
             usersArr.append(usersJson)
             usersArr.sort(key=lambda p: p['orders'])
         return json({"data":usersArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def UserRandomOrder():
+    try:
+        usersArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from users where id_role = 3 order by status desc"""
+        cursor["cursor"].execute(query_search)
+        users = cursor["cursor"].fetchall()
+        for x in users:
+            query_search = """SELECT COUNT(ord.id)
+                                from purchase_order ord
+                                WHERE ord.id_user = %s
+                                and ord.id not in (SELECT id_purchase_order
+                                FROM invoices); """
+            cursor["cursor"].execute(query_search,(x[0],))
+            orders = cursor["cursor"].fetchone()
+            usersJson = {
+                "id":x[0],
+                "name": x[4]+" "+x[5],
+                "orders": orders[0]
+            }
+            usersArr.append(usersJson)
+            usersArr.sort(key=lambda p: p['orders'])
+            userid = usersArr[0]['id']
+        return json({"data":userid,"code":200},200)
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
@@ -214,6 +269,9 @@ async def updatePassword(request):
                 request["new_password"]= hashlib.sha256(str(request["new_password"]).encode()).hexdigest()
                 sql_update_query = """Update users set psw = %s , username=%s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],request["id"],))
+                query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+                records_history = ('Actualizó las Credenciales del Usuario '+request["username"],request["user_created"],datetime.now(),)
+                cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
                 return json({"data":"Contrasena actualizada con éxito","code":200},200)
             else:
