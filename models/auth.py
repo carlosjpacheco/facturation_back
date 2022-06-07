@@ -10,10 +10,6 @@ from sanic.response import json
 from utilities.validators import validSignup, validUpdateUser
 import random
 from utilities.sendEmails import sendPswAdm
-from cryptography.fernet import Fernet
-
-key = Fernet.generate_key() 
-fernet = Fernet(key)
 
 async def signup(request):
     try:
