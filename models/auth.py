@@ -13,8 +13,8 @@ async def signup(request):
         cursor = connectPSQL()
         request["psw"]= hashlib.sha256(str(request["psw"]).encode()).hexdigest()
         if valid == True:
-            postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
-            record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V')
+            postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni,email) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
+            record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V',request["email"])
             cursor["cursor"].execute(postgres_insert_query, record_to_insert)
             query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
             records_history = ('Agregó un Nuevo Usuario',request["user_created"],datetime.now(),)
@@ -82,6 +82,9 @@ async def updateUser(request):
             if "last_name" in request:
                 sql_update_query = """Update users set last_name = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["last_name"],request["id"],))
+            if "email" in request:
+                sql_update_query = """Update users set email = %s where id = %s"""
+                cursor["cursor"].execute(sql_update_query, (request["email"],request["id"],))
             if "dni_rif" in request:
                 sql_update_query = """Update users set dni_rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["dni_rif"],request["id"],))
@@ -129,7 +132,8 @@ async def readUser(request):
                 "last_name": user[5],
                 "role":rol[0],
                 "type_dni": user[7],
-                "status": user[8]}}})    
+                "status": user[8],
+                "email": user[9]}}})    
         else:
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
