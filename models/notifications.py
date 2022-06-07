@@ -23,3 +23,13 @@ def updateNotification(request,data):
         return json({"data":"Marcada como leita","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
+
+def listNotifications(data):
+    try:
+        cursor = connectPSQL()
+        query_search = """SELECT * from notifications WHERE source = %s"""
+        cursor["cursor"].execute(query_search)
+        invoices = cursor["cursor"].fetchall()
+
+    except(Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)

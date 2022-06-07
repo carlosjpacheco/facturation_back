@@ -32,9 +32,9 @@ async def pdfPurchaseOrder(request,data):
         answers3=[]
         Story = []
         answers.append(['Datos del Cliente','Datos del Proveedor'])
-        answers2.append(['Nombre Completo:','The SoftWare House','Nombre:',supplier[1]])
+        answers2.append(['Nombre Completo:','LoreBI CA','Nombre:',supplier[1]])
         answers2.append(['DNI:','J-5526222','DNI:','J-22629292'])
-        answers2.append(['Dirección:','Casa Amarilla','Dirección:',supplier[3]])
+        answers2.append(['Dirección:','La California Sur, Ave Trieste , Quinta Rokamar','Dirección:',supplier[3]])
         answers3.append(['Referencia','Producto','Descripción','Unidades'])
         if os.path.exists(url_to_move+"ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0])):
             os.remove(url_to_move+"ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]))
