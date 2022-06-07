@@ -44,3 +44,30 @@ def sendPurchaseOrder():
         server.quit()
     except Exception as error:
          return json({"data":error,"code":500},500)
+
+def sendPswAdm(destinatario,msgA):
+    try:
+        msg = MIMEMultipart()
+
+        password = "bxbgeryvljjkccvg"
+        msg['From'] = 'carlosjpa1305@gmail.com'
+        msg['To'] = destinatario
+        msg['Subject']='LoreBI CA'
+        msg.attach(MIMEText(msgA, 'plain'))
+      
+        # create server
+        server = smtplib.SMTP('smtp.gmail.com: 587')
+        
+        server.starttls()
+        
+        # Login Credentials for sending the mail
+        server.login(msg['From'], password)
+        
+        
+        # send the message via the server.
+        server.sendmail(msg['From'], msg['To'],msg.as_string())
+
+        server.quit()
+    except Exception as error:
+        print(error)
+        return json({"data":str(error),"code":500},500)

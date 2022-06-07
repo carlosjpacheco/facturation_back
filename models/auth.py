@@ -1,17 +1,26 @@
 from datetime import datetime
+import base64
 import hashlib
 from os import curdir
+import string
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
 from utilities.validators import validSignup, validUpdateUser
+import random
+from utilities.sendEmails import sendPswAdm
+from cryptography.fernet import Fernet
+
+key = Fernet.generate_key() 
+fernet = Fernet(key)
 
 async def signup(request):
     try:
         valid = await validSignup(request)
         cursor = connectPSQL()
-        request["psw"]= hashlib.sha256(str(request["psw"]).encode()).hexdigest()
+        request['psw'] = request['psw'].encode("utf-8")
+        request['psw'] = base64.b64encode(request['psw']).decode()
         if valid == True:
             postgres_insert_query = """ INSERT INTO users (username,psw,dni_rif,first_name,last_name,id_role,type_dni,email) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
             record_to_insert =(request["username"],request["psw"],request["dni_rif"],request["first_name"],request["last_name"],request["id_role"],'V',request["email"])
@@ -29,15 +38,19 @@ async def signup(request):
 def login(request):
     try:
         cursor = connectPSQL()
-        request["psw"] = hashlib.sha256(str(request["psw"]).encode()).hexdigest()
-        # print(str(request["psw"]))
+        request['psw'] = request['psw'].encode("utf-8")
+        request['psw'] = base64.b64encode(request['psw']).decode()
+        # dec = base64.b64decode(request['psw']).decode()
+
         sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
-
         cursor["cursor"].execute(sql_select_query, (request["username"],str(request["psw"]),))
-
         user = cursor["cursor"].fetchone()
+
         if user:
             if user[8] == True:
+                sql_update_query = """Update users set attemp = %s where username = %s"""
+                cursor["cursor"].execute(sql_update_query, (0,request["username"]))
+                cursor["conn"].commit()
                 return json(
                     {
                         'data':{
@@ -58,7 +71,24 @@ def login(request):
             else:
                 return json({"error":"Usuario Inactivo","code":500},500)
         else:
-            return json({"error":"Usuario o contraseña incorrecta","code":500},500)
+            sql_select_query = """SELECT * FROM users WHERE username = %s"""
+            cursor["cursor"].execute(sql_select_query, (request["username"],))
+            user = cursor["cursor"].fetchone()
+            if user:
+                if user[10]+1==3:
+                    sql_update_query = """Update users set attemp = %s,status = %s where username = %s"""
+                    cursor["cursor"].execute(sql_update_query, ((user[10]+1),False,request["username"]))
+                    cursor["conn"].commit()
+                    return json({"error":"Su usuario se ha bloqueado y se le envio un correo con su contraseña, notificar al supervisor para activar el usuario","code":500},500)
+                elif user[10]==10:
+                    return json({"error":"Su usuario se ha bloqueado y se le envio un correo con su contraseña, notificar al supervisor para activar el usuario","code":500},500)
+                else:
+                    sql_update_query = """Update users set attemp = %s where username = %s"""
+                    cursor["cursor"].execute(sql_update_query, ((user[10]+1),request["username"]))
+            cursor["conn"].commit()
+
+
+            return json({"error":"Usuario o contraseña incorrecta, al tercer intento se bloqueará","code":500},500)
     except Exception as error:
         return json({"error":str(error),"code":500},500)
 
@@ -102,6 +132,8 @@ async def deleteUser(request):
         cursor = connectPSQL()
         if request["status"] == True:
             status = False
+            sql_delete_query = """Update users set status=%s where id = %s"""
+            cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
         else:
             status = True
         sql_delete_query = """Update users set status=%s where id = %s"""
@@ -262,25 +294,33 @@ async def searchUser(request):
 async def updatePassword(request):
     try:
         cursor = connectPSQL()
-        request["password"]= hashlib.sha256(str(request["password"]).encode()).hexdigest()
-        query_search = """SELECT * from users WHERE id = %s AND psw= %s"""
-        cursor["cursor"].execute(query_search,(request["id"],request["password"]))
+        query_search = """SELECT * from users WHERE id = %s AND"""
+        cursor["cursor"].execute(query_search,(request["id"],))
         user = cursor["cursor"].fetchone()
         
-        if user:
-            valid = await validUpdateUser(request)
-            if valid == True:
-                request["new_password"]= hashlib.sha256(str(request["new_password"]).encode()).hexdigest()
-                sql_update_query = """Update users set psw = %s , username=%s where id = %s"""
-                cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],request["id"],))
-                query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
-                records_history = ('Actualizó las Credenciales del Usuario '+request["username"],request["user_created"],datetime.now(),)
-                cursor["cursor"].execute(query_history,records_history)
-                cursor["conn"].commit()
-                return json({"data":"Contrasena actualizada con éxito","code":200},200)
-            else:
-                return valid
+        valid = await validUpdateUser(request)
+        if valid == True:
+            request['new_password'] = base64.b64encode(request['psw']).decode()
+            sql_update_query = """Update users set psw = %s , username=%s where id = %s"""
+            cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],request["id"],))
+            query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+            records_history = ('Actualizó las Credenciales del Usuario '+request["username"],request["user_created"],datetime.now(),)
+            cursor["cursor"].execute(query_history,records_history)
+            cursor["conn"].commit()
+            return json({"data":"Contrasena actualizada con éxito","code":200},200)
         else:
-            return json({"error":"Contrasena incorrecta, por favor verifique y vuelva a intentar","code":500},500)
+            return valid
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
+
+async def forgotPassword(request):
+    try:
+        cursor = connectPSQL()
+        sql_select_query = """SELECT * FROM users WHERE username = %s"""
+        cursor["cursor"].execute(sql_select_query, (request["username"],))
+        user = cursor["cursor"].fetchone()
+        dec = base64.b64decode(user[2]).decode()
+        sendPswAdm(user[9],'Su contraseña es:'+dec)
+        return json({"data":"Se le ha enviado un correo con la recuperación de su contraseña","code":200},200)
+    except Exception as error:
+         return json({"data":str(error),"code":500},500)
