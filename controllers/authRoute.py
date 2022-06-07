@@ -63,3 +63,7 @@ async def ping(request: Request, token:Token):
 @jwt_required
 async def ping(request: Request, token:Token):
     return await auth.updatePassword(request.json)
+
+@ar.route('/forgotPassword', methods=['POST'])
+async def ping(request: Request):
+    return await auth.forgotPassword(request.json)
