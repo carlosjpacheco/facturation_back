@@ -1,3 +1,4 @@
+from audioop import add
 from datetime import datetime
 from importlib.resources import path
 from locale import currency
@@ -8,6 +9,7 @@ from sanic.response import json
 
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
+from models.notifications import addNotification
 
 async def addPurchaseOrder(request,data):
     try:
@@ -73,6 +75,7 @@ async def addPurchaseOrderDetail(request,data):
     products_list = []
     for val in request["products"]:
         list_val = []
+        val['description']= val['description'].replace(',','|')
         list_val.append(val["name"])
         list_val.append(val["description"])
         list_val.append(val["quantity"])
@@ -96,14 +99,14 @@ async def addPurchaseOrderDetail(request,data):
 
     sql_update = """Update purchase_order set path=%s where id = %s"""
     cursor["cursor"].execute(sql_update,(path,purchaseOrder[0],))
-    
+    print(products)
     query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
     records = (purchaseOrder[0],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),products,)
     cursor["cursor"].execute(query_noti,records)
 
     cursor["conn"].commit()
 
-async def updatePurchaseOrder(request):
+async def updatePurchaseOrder(request,data):
     try:
         cursor = connectPSQL()
         query = """
@@ -112,11 +115,15 @@ async def updatePurchaseOrder(request):
             WHERE id = %s"""
         records = (request["id_user"],request["id_order"],)
         cursor["cursor"].execute(query,records)
+        await addNotification({
+            "destination":request['id_user'],
+            "source":data,
+            "description":"Te han asignado la orden de compra <br>#{id}</br>".format(id=request["id_order"])})
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
+        print(error)
         return json({"error":str(error),"code":500},500)
-
 
 async def listPurchaseOrder():
     try:

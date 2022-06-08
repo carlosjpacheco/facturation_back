@@ -263,7 +263,6 @@ async def UserRandomOrder():
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-
 async def searchUser(request):
     try:
         cursor = connectPSQL()
@@ -285,7 +284,6 @@ async def searchUser(request):
             return json({"data":"No se consiguio ningun usuario","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
-
 
 async def updatePassword(request):
     try:

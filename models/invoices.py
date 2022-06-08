@@ -15,7 +15,6 @@ async def addInvoice(request,data):
             query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             records = (request["nro_invoice"],request["id_user"],request["total"],request["id_status"],request["id_purchase_order"],False,data,False,datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),)
             cursor["cursor"].execute(query_noti,records)
-            print("QLQQQ")
             cursor["conn"].commit()
             addInvoiceDetail(request)
             return json({"data":"Factura creada","code":200},200)
