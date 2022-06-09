@@ -118,20 +118,26 @@ async def updatePurchaseOrder(request,data):
         await addNotification({
             "destination":request['id_user'],
             "source":data,
-            "description":"Te han asignado la orden de compra <br>#{id}</br>".format(id=request["id_order"])})
+            "description":"Te han asignado la orden de compra Nro {id}".format(id=request["id_order"])})
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":str(error),"code":500},500)
 
-async def listPurchaseOrder():
+async def listPurchaseOrder(request):
     try:
         cursor = connectPSQL()
         purchaseOrdersArr = []
-        query_search = """SELECT * from purchase_order order by id desc"""
-        cursor["cursor"].execute(query_search)
-        purchaseOrders = cursor["cursor"].fetchall()
+        if request['role'] == 1 or request['role'] == 2:
+            query_search = """SELECT * from purchase_order order by id desc"""
+            cursor["cursor"].execute(query_search)
+            purchaseOrders = cursor["cursor"].fetchall()
+        else:
+            query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
+            cursor["cursor"].execute(query_search,(request['id_user'],))
+            purchaseOrders = cursor["cursor"].fetchall()
+
         if purchaseOrders:
             for x in purchaseOrders:
                 query_search = """SELECT * from detail_purchase_order where id_purchase_order = %s"""

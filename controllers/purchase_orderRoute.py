@@ -27,10 +27,10 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return purchase_order.updatePurchaseOrder(request.json,token.identity)
 
-@po.route('/list', methods=['GET'])
+@po.route('/list', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return purchase_order.listPurchaseOrder()
+    return purchase_order.listPurchaseOrder(request.json)
 
 @po.route('/productsSelect', methods=['GET'])
 # @jwt_required
