@@ -10,6 +10,7 @@ from sanic.response import json
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
 from models.notifications import addNotification
+from utilities.charts import assign_user_purchaseOrder_bar
 
 async def addPurchaseOrder(request,data):
     try:
