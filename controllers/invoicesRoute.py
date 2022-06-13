@@ -25,6 +25,11 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return invoices.updateInvoice(request.json)
 
+@inv.route('/updateUser', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.updateInvoiceUser(request.json,token.identity)
+
 @inv.route('/read', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
