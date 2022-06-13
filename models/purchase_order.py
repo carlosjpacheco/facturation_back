@@ -159,6 +159,7 @@ async def listPurchaseOrder():
         else:
             return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
     except (Exception, psycopg2.Error) as error:
+        print(error)
         return json({"error":error,"code":500},500)
 
 async def listCurrency():

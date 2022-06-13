@@ -19,7 +19,7 @@ async def assign_user_purchaseOrder_pie():
                             FROM invoices); """
         cursor["cursor"].execute(query_search)
         ordersP = cursor["cursor"].fetchone()
-        return json({"data":{"processed":ordersP[0],'unprocessed':orders[0], 'total':orders[0]+ordersP[0]},"code":200},200)
+        return json({"data":{"processed":ordersP[0],'unProcessed':orders[0], 'total':orders[0]+ordersP[0]},"code":200},200)
     except (Exception , psycopg2.Error) as error:
         return json({"error":str(error),"code":500})
 
@@ -27,6 +27,8 @@ async def assign_user_purchaseOrder_bar():
     try:
         today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
         days = []
+        processed = []
+        unProcessed = []
         week = today - timedelta(days=7)
         cursor = connectPSQL()
         while(week < today):
@@ -41,12 +43,14 @@ async def assign_user_purchaseOrder_bar():
                                 from purchase_order ord WHERE
                                 ord.id in (SELECT id_purchase_order
                                 FROM invoices) and
-                                date >= %s and date <= %s;"""
+                                date >= %s and completed_at <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             ordersP = cursor["cursor"].fetchone()
+            days.append(str(week)[5:10])
+            processed.append(ordersP[0])
+            unProcessed.append(orders[0])
             week = week + timedelta(days=1)
-            days.append({"processed":ordersP[0],'unprocessed':orders[0],"date":week})
-        return json({"data":days,"code":200},200)
+        return json({"data":{'days':days,'processed':processed,'unProcessed':unProcessed},"code":200},200)
     except (Exception , psycopg2.Error) as error:
         print(error)
         return json({"error":str(error),"code":500})
