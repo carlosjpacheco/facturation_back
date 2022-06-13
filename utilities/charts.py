@@ -19,7 +19,7 @@ async def assign_user_purchaseOrder_pie():
                             FROM invoices); """
         cursor["cursor"].execute(query_search)
         ordersP = cursor["cursor"].fetchone()
-        return json({"data":{"processed":ordersP,'unprocessed':orders, 'total':orders+ordersP},"code":200},200)
+        return json({"data":{"processed":ordersP[0],'unprocessed':orders[0], 'total':orders[0]+ordersP[0]},"code":200},200)
     except (Exception , psycopg2.Error) as error:
         return json({"error":str(error),"code":500})
 
