@@ -244,6 +244,38 @@ async def listUsersOrder():
     except (Exception,psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
+async def listUsersInvoice():
+    try:
+        usersArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from users where id_role = 5 order by status desc"""
+        cursor["cursor"].execute(query_search)
+        users = cursor["cursor"].fetchall()
+        for x in users:
+            query_search = """SELECT COUNT(inv.id)
+                                from invoices inv
+                                WHERE inv.id_user = %s
+                                and inv.id_status = 1; """
+            cursor["cursor"].execute(query_search,(x[0],))
+            orders = cursor["cursor"].fetchone()
+            query_search = """SELECT COUNT(inv.id)
+                                from invoices inv
+                                WHERE inv.id_user = %s
+                                and inv.id_status = 0; """
+            cursor["cursor"].execute(query_search,(x[0],))
+            ordersP = cursor["cursor"].fetchone()
+            usersJson = {
+                "id":x[0],
+                "name": x[4]+" "+x[5],
+                "orders": orders[0],
+                "ordersP":ordersP[0]
+            }
+            usersArr.append(usersJson)
+            usersArr.sort(key=lambda p: p['orders'])
+        return json({"data":usersArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
 async def UserRandomOrder():
     try:
         usersArr = []

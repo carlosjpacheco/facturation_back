@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 import time
-from facturation_back.models.notifications import addNotification
+from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
