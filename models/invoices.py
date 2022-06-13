@@ -1,6 +1,7 @@
 from datetime import datetime
 import re
 import time
+from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
@@ -79,6 +80,25 @@ async def updateInvoice(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
+async def updateInvoiceUser(request,data):
+    try:
+        cursor = connectPSQL()
+        query = """
+            UPDATE invoices set 
+                id_user = %s
+            WHERE id = %s"""
+        records = (request["id_user"],request["id_invoice"],)
+        cursor["cursor"].execute(query,records)
+        await addNotification({
+            "destination":request['id_user'],
+            "source":data,
+            "description":"Te han asignado la factura #{id}".format(id=request["id_invoice"])})
+        cursor["conn"].commit()
+        return json({"data":"Usuario asignado con éxito","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        print(error)
+        return json({"error":str(error),"code":500},500)
+
 def addInvoiceDetail(request):
     cursor = connectPSQL()
     query_search = """SELECT * from invoices WHERE nro_invoice = %s"""
@@ -123,11 +143,21 @@ async def listInvoices():
                 query_search = """SELECT * from invoice_detail WHERE id_invoice = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
                 detail = cursor["cursor"].fetchall()
+                if x[2] != None:
+                    query_search3 = """SELECT * from users where id = %s"""
+                    cursor["cursor"].execute(query_search3,(x[2],))
+                    user = cursor["cursor"].fetchone()
+                    uservalue = user[4]+ " "+user[5]
+                else:
+                    uservalue = "Sin Asignar"
                 for y in detail:
                     details.append({'amount':y[1],'product':y[2],'quantity':y[3]})
                 invoicesJson = {
+                    "id": x[0],
                     "nro_invoice":x[1],
                     "total":x[3],
+                    "user": uservalue,
+                    "supplier": x[10],
                     "status":status[1],
                     "date":x[9],
                     "products":details
