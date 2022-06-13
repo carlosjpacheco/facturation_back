@@ -6,6 +6,7 @@ from controllers.rolesRoute import ro
 from controllers.invoicesRoute import inv
 from controllers.purchase_orderRoute import po
 from controllers.paymentsRoute import p
+from controllers.chartsRoute import ch
 
 
-api = Blueprint.group(ar,s,n,ro,inv,po,p, url_prefix='/api')
+api = Blueprint.group(ar,s,n,ro,inv,po,p,ch, url_prefix='/api')

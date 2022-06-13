@@ -225,10 +225,18 @@ async def listUsersOrder():
                                 FROM invoices); """
             cursor["cursor"].execute(query_search,(x[0],))
             orders = cursor["cursor"].fetchone()
+            query_search = """SELECT COUNT(ord.id)
+                                from purchase_order ord
+                                WHERE ord.id_user = %s
+                                and ord.id in (SELECT id_purchase_order
+                                FROM invoices); """
+            cursor["cursor"].execute(query_search,(x[0],))
+            ordersP = cursor["cursor"].fetchone()
             usersJson = {
                 "id":x[0],
                 "name": x[4]+" "+x[5],
-                "orders": orders[0]
+                "orders": orders[0],
+                "ordersP":ordersP[0]
             }
             usersArr.append(usersJson)
             usersArr.sort(key=lambda p: p['orders'])

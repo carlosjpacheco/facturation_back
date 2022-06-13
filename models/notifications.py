@@ -26,14 +26,17 @@ async def updateNotification(request,data):
 
 async def listNotifications(data):
     try:
+        cont = 0
         notifications = []
         newNotifications=False
         cursor = connectPSQL()
         query_search = """SELECT * from notifications WHERE destination = %s"""
         cursor["cursor"].execute(query_search,(data,))
         noti = cursor["cursor"].fetchall()
+        print(data)
         for x in noti:
             if x[3] == False:
+                cont+=1
                 newNotifications = True
             notifications.append({
                 "id":x[0],
@@ -41,6 +44,6 @@ async def listNotifications(data):
                 'date':x[5],
                 'read':x[3]
             })
-        return json({"data":notifications,"newNotification":newNotifications,"code":200},200)
+        return json({"data":notifications,"newNotification":newNotifications,"lenNewNoti":cont,"code":200},200)
     except(Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

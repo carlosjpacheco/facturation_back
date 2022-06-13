@@ -10,6 +10,7 @@ from sanic.response import json
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
 from models.notifications import addNotification
+from utilities.charts import assign_user_purchaseOrder_bar
 
 async def addPurchaseOrder(request,data):
     try:
@@ -118,7 +119,7 @@ async def updatePurchaseOrder(request,data):
         await addNotification({
             "destination":request['id_user'],
             "source":data,
-            "description":"Te han asignado la orden de compra Nro {id}".format(id=request["id_order"])})
+            "description":"Te han asignado la orden de compra #{id}".format(id=request["id_order"])})
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
