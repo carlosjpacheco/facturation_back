@@ -43,7 +43,7 @@ async def assign_user_purchaseOrder_bar():
                                 from purchase_order ord WHERE
                                 ord.id in (SELECT id_purchase_order
                                 FROM invoices) and
-                                date >= %s and completed_at <= %s;"""
+                                date >= %s and date <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             ordersP = cursor["cursor"].fetchone()
             days.append(str(week)[5:10])
