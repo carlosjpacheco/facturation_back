@@ -5,6 +5,7 @@ from sanic.response import json
 
 async def addNotification(request):
     try:
+        print('HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa')
         cursor = connectPSQL()
         query_noti = """INSERT INTO notifications (description,date,destination,read,source) VALUES (%s,%s,%s,%s,%s)"""
         records = (request["description"],str(time.time()),request["destination"],False,request['source'])
@@ -12,6 +13,7 @@ async def addNotification(request):
         cursor["conn"].commit()
         return json({"data":"Notificación enviada","code":200},200)
     except (Exception, psycopg2.Error) as error:
+        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def updateNotification(request,data):

@@ -15,3 +15,13 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return charts.assign_user_purchaseOrder_pie()
+
+@ch.route('/barInvoice', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return charts.pay_invoice_bar()
+
+@ch.route('/pieInvoice', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return charts.pay_invoice_pie()

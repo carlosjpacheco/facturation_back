@@ -7,9 +7,9 @@ from sanic.request import Request
 p = Blueprint('payments', url_prefix='/payments')
 
 @p.route('/payment', methods=['POST'])
-# @jwt_required
-def ping(request: Request):
-    return payments.payment(request.json)
+@jwt_required
+def ping(request: Request, token: Token):
+    return payments.payInvoice(request.json,token.identity)
 
 @p.route('/execute', methods=['POST'])
 # @jwt_required
