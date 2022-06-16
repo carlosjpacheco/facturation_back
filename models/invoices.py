@@ -153,12 +153,12 @@ async def listInvoices():
                 invoicesJson = {
                     "id": x[0],
                     "nro_invoice":x[1],
-                    "total":x[3],
+                    "total":x[11],
                     "user": uservalue,
-                    "supplier": x[10],
+                    "supplier": x[9],
                     "status":status[1],
-                    "date":x[9],
-                    "products":details
+                    "date":x[10],
+                    "products":details,
                 }
                 invoicesArr.append(invoicesJson)
             return json({"data":invoicesArr,"code":200},200)

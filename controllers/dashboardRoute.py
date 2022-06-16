@@ -46,29 +46,19 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return  dashboard.top_supplier_by_TotalInv()
     
-########################### Summary last 15 days ################################################
-
-@da.route('/topSupplierByINVP', methods=['GET'])
+@da.route('/amountPaidInvByUser', methods=['GET'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.top_supplier_by_INVP()
+    return  dashboard.amount_paid_inv_by_user()
 
-@da.route('/amountPaidInvByUser', methods=['POST'])
+########################### Modals ################################################
+
+@da.route('/listInvoicesSummaryDaily', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.amount_paid_inv_by_user(request.json)
+    return  dashboard.listInvoicesSummary(request.json)
 
-@da.route('/poQuantityByWeekOrMonth', methods=['POST'])
+@da.route('/listPurchaseOrdersSummary', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.po_quantity_Pro_UnPro_by_week_or_month(request.json)
-
-@da.route('/invQuantityPaidByWeekOrMonth', methods=['POST'])
-@jwt_required
-def ping(request: Request, token : Token):
-    return  dashboard.inv_quantity_Paid_by_week_or_month(request.json)
-
-@da.route('/invQuantityProByWeekOrMonth', methods=['POST'])
-@jwt_required
-def ping(request: Request, token : Token):
-    return  dashboard.inv_quantity_Pro_by_week_or_month(request.json)
+    return  dashboard.listPurchaseOrderSummary(request.json)
