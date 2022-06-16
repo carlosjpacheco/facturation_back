@@ -13,7 +13,7 @@ async def payInvoice(request,data):
         query = """
             UPDATE invoices set 
                 id_status = 0,
-                payed_at = %s
+                paid_at = %s
             WHERE id = %s"""
         records = (date ,request["id"],)
         cursor["cursor"].execute(query,records)

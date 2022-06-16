@@ -84,13 +84,13 @@ async def pay_invoice_bar():
             query_search = """SELECT COUNT(ord.id)
                             from invoices inv WHERE
                             inv.paid = True
-                            payed_at >= %s and payed_at <= %s;"""
+                            paid >= %s and paid <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             orders = cursor["cursor"].fetchone()
             query_search = """SELECT COUNT(ord.id)
                             from invoices inv WHERE
                             inv.paid = False
-                            payed_at >= %s and payed_at <= %s;"""
+                            paid >= %s and paid <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             ordersP = cursor["cursor"].fetchone()
             days.append(str(week)[5:10])

@@ -1,6 +1,4 @@
 from datetime import datetime
-import re
-import time
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -138,7 +136,7 @@ async def listInvoices():
         if invoices:
             for x in invoices:
                 query_search = """SELECT * from invoices_status WHERE id = %s"""
-                cursor["cursor"].execute(query_search,(x[4],))
+                cursor["cursor"].execute(query_search,(x[3],))
                 status = cursor["cursor"].fetchone()
                 query_search = """SELECT * from invoice_detail WHERE id_invoice = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
