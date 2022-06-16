@@ -130,7 +130,6 @@ async def count_pro_unpro_LastDays():
 async def top_supplier_by_TotalInv():
     try:
         cursor = connectPSQL()
-        cursor2 = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         today = today - timedelta(days=14)
         query = """
@@ -171,15 +170,17 @@ async def top_supplier_by_INVP():
         return json({"error":str(error),"code":500},500)
 
 
-async def amount_paid_inv_by_user(request):
+async def amount_paid_inv_by_user():
     try:
         cursor = connectPSQL()
+        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+        today = today - timedelta(days=14)
         query = """
-        select sum(inv.totals),count(inv.id)
-        from invoices inv
+        select sum(inv.total),count(inv.id)
+        from invoices inv,users u
         where inv.id_user = %s
         """
-        records = (request['id_user'],)
+        records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchone()
         return json({'data':data,'code':200},200)
