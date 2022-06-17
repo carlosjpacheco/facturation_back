@@ -1,11 +1,9 @@
 from calendar import month
 from datetime import date, datetime, timedelta
-from locale import currency
-
-from requests import request
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
+from dateutil.relativedelta import relativedelta
 
 ########################### Summary of the day ################################################
 async def amount_paid_in_invoices_daily():
@@ -146,14 +144,13 @@ async def top_supplier_by_TotalInv():
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         today = today - timedelta(days=14)
         query = """
-        select count(po.id_supplier),s.name,sum(inv.total),po.id_currency, po.id_supplier
-        from purchase_order po, supplier s, invoices inv
-        where inv.id_purchase_order = po.id 
+        select count(po.id_supplier),s.name,sum(inv.total), cu.name
+        from purchase_order po, supplier s, invoices inv, currency cu
+        where inv.id_purchase_order = po.id and cu.id = po.id_currency
         and po.id_supplier = s.id 
         and inv.paid = True
         and paid_at >= %s
-        group by po.id_currency,s.name,po.id_supplier
-        order by s.name desc
+        group by po.id_currency,s.name,po.id_supplier, cu.name
         limit 5
         """
         records = (today.timestamp(),)
@@ -164,18 +161,17 @@ async def top_supplier_by_TotalInv():
         print(error)
         return json({"error":str(error),"code":500},500)
 
-
 async def amount_paid_inv_by_user():
     try:
         cursor = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         today = today - timedelta(days=14)
         query = """
-        select sum(inv.total),count(inv.id), u.first_name, u.last_name
-        from invoices inv,users u
-        where inv.id_user = u.id
+        select sum(inv.total),count(inv.id), u.first_name, u.last_name, cu.name
+        from invoices inv,users u, purchase_order po, currency cu
+        where inv.id_user = u.id and inv.id_purchase_order = po.id and cu.id = po.id_currency
         and inv.paid_at >= %s
-        group by u.first_name, u.last_name
+        group by po.id_currency,u.id, cu.name
         """
         records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
@@ -184,7 +180,7 @@ async def amount_paid_inv_by_user():
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-########################### Summary last 15 days ################################################
+########################### Modals ################################################
 
 async def listInvoicesSummary(request):
     try:
@@ -292,3 +288,86 @@ async def listPurchaseOrderSummary(request):
     except (Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":error,"code":500},500)
+
+
+########################### Chart ################################################
+
+async def yearlyChart():
+    try:
+        cursor = connectPSQL()
+        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+        labelsX = []
+        invoices = []
+        po = []
+        invPaidDo = []
+        invPaidBs = []
+        initYear = today - relativedelta(months=today.month-1,days=today.day-1)
+        while (initYear.month <= today.month):
+            datetime_object = datetime.strptime(str(initYear.month), "%m")
+            full_month_name = datetime_object.strftime("%B")
+            labelsX.append(full_month_name)
+
+            queryInvoices = """
+            Select count(inv.id)
+            From invoices inv 
+            Where paid_at >= %s
+            and paid_at <= %s
+            """
+            records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
+            cursor['cursor'].execute(queryInvoices,records)
+            countInvoices = cursor['cursor'].fetchone()
+            invoices.append(countInvoices[0])
+
+            queryPO = """
+            Select count(po.id)
+            From purchase_order po 
+            Where completed_at >= %s
+            and completed_at <= %s
+            """
+            records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
+            cursor['cursor'].execute(queryPO,records)
+            countPO = cursor['cursor'].fetchone()
+            po.append(countPO[0])
+
+            queryInvPaidDo = """
+            Select SUM(inv.total)
+            From invoices inv, purchase_order po
+            Where paid_at >= %s
+            and paid_at <= %s
+            and inv.id_purchase_order = po.id
+            and po.id_currency = 1
+            and paid = True
+            """
+            records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
+            cursor['cursor'].execute(queryInvPaidDo,records)
+            invDo = cursor['cursor'].fetchone()
+            print(invDo[0])
+            if invDo[0] is None:
+                equis=0
+                invPaidDo.append(equis)
+            else:
+                invPaidDo.append(invDo[0])
+
+            queryInvPaidBs = """
+            Select SUM(inv.total)
+            From invoices inv, purchase_order po
+            Where paid_at >= %s
+            and paid_at <= %s
+            and inv.id_purchase_order = po.id
+            and po.id_currency = 2
+            and paid = True
+            """
+            records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
+            cursor['cursor'].execute(queryInvPaidBs,records)
+            invBs = cursor['cursor'].fetchone()
+            if invBs[0] is None:
+                equis=0
+                invPaidBs.append(equis)
+            else:
+                invPaidBs.append(invBs[0])
+
+            initYear = initYear + relativedelta(months=1)
+
+        return json({'data':{'labels':labelsX, 'invoices':invoices, 'po':po,'invPaidDo':invPaidDo,'invPaidBs':invPaidBs} ,'code': 200},200)
+    except (Exception, psycopg2.Error)as error:
+        return json({'error':str(error),"code":500},500)

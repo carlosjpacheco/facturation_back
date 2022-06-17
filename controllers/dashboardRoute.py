@@ -62,3 +62,10 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return  dashboard.listPurchaseOrderSummary(request.json)
+
+########################### Chart ################################################
+
+@da.route('/yearlyChart', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return  dashboard.yearlyChart()
