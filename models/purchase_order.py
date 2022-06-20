@@ -172,7 +172,7 @@ async def listCurrency():
     try:
         currencyArr = []
         cursor = connectPSQL()
-        query_search = """SELECT * from currency"""
+        query_search = """SELECT * from currency WHERE id = 1"""
         cursor["cursor"].execute(query_search)
         currency = cursor["cursor"].fetchall()
         for x in currency:

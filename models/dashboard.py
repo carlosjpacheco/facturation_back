@@ -11,21 +11,18 @@ async def amount_paid_in_invoices_daily():
         cursor = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         query = """
-            select po.id_currency, SUM(inv.total), count(inv.id)
+            select SUM(inv.total), count(inv.id)
             from invoices inv , purchase_order po
             where inv.paid_at >= %s
             and inv.id_purchase_order = po.id
-            group by po.id_currency,inv.id
+            group by  inv.id
         """
         records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
+        print(data)
         if len(data)==0:
-            data = [[0,0,0],[0,0,0]]
-        if len(data)==1 and data[0][0]==1:
-            data.insert(0,[0,0,0])
-        if len(data)==1 and data[0][0]==2:
-            data.append([0,0,0])
+            data = [[0,0]]
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         print(error)
@@ -79,21 +76,17 @@ async def amount_paid_in_invoices_lastDay():
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         today = today - timedelta(days=14)
         query = """
-            select po.id_currency, SUM(inv.total), count(inv.id)
+            select SUM(inv.total), count(inv.id)
             from invoices inv , purchase_order po
             where inv.paid_at >= %s
             and inv.id_purchase_order = po.id
-            group by po.id_currency,inv.id
+            group by inv.id
         """
         records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
         if len(data)==0:
-            data = [[0,0,0],[0,0,0]]
-        if len(data)==1 and data[0][0]==1:
-            data.insert(0,[0,0,0])
-        if len(data)==1 and data[0][0]==2:
-            data.append([0,0,0])
+            data = [[0,0]]
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -144,13 +137,14 @@ async def top_supplier_by_TotalInv():
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         today = today - timedelta(days=14)
         query = """
-        select count(po.id_supplier),s.name,sum(inv.total), cu.name
-        from purchase_order po, supplier s, invoices inv, currency cu
-        where inv.id_purchase_order = po.id and cu.id = po.id_currency
-        and po.id_supplier = s.id 
-        and inv.paid = True
+        select count(inv.id),inv.name_supplier,sum(inv.total), cu.name
+        from purchase_order po, invoices inv, currency cu
+        where inv.id_purchase_order = po.id  
+        and inv.id_status = 0
         and paid_at >= %s
-        group by po.id_currency,s.name,po.id_supplier, cu.name
+        and po.id_currency = cu.id
+        group by inv.name_supplier, cu.name
+        order by sum(inv.total) desc
         limit 5
         """
         records = (today.timestamp(),)
@@ -256,7 +250,6 @@ async def listPurchaseOrderSummary(request):
         records = (today.timestamp(),today.timestamp(),)
         cursor['cursor'].execute(query_search,records)
         purchaseOrders = cursor["cursor"].fetchall()
-        print("AQUIIIIIIIIII")
         if purchaseOrders:
             for x in purchaseOrders:
                 query_search = """SELECT name from currency WHERE id = %s"""
@@ -336,38 +329,37 @@ async def yearlyChart():
             and paid_at <= %s
             and inv.id_purchase_order = po.id
             and po.id_currency = 1
-            and paid = True
+            and inv.id_status = 0
             """
             records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
             cursor['cursor'].execute(queryInvPaidDo,records)
             invDo = cursor['cursor'].fetchone()
-            print(invDo[0])
             if invDo[0] is None:
                 equis=0
                 invPaidDo.append(equis)
             else:
                 invPaidDo.append(invDo[0])
 
-            queryInvPaidBs = """
-            Select SUM(inv.total)
-            From invoices inv, purchase_order po
-            Where paid_at >= %s
-            and paid_at <= %s
-            and inv.id_purchase_order = po.id
-            and po.id_currency = 2
-            and paid = True
-            """
-            records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
-            cursor['cursor'].execute(queryInvPaidBs,records)
-            invBs = cursor['cursor'].fetchone()
-            if invBs[0] is None:
-                equis=0
-                invPaidBs.append(equis)
-            else:
-                invPaidBs.append(invBs[0])
+            # queryInvPaidBs = """
+            # Select SUM(inv.total)
+            # From invoices inv, purchase_order po
+            # Where paid_at >= %s
+            # and paid_at <= %s
+            # and inv.id_purchase_order = po.id
+            # and po.id_currency = 2
+            # and paid = True
+            # """
+            # records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
+            # cursor['cursor'].execute(queryInvPaidBs,records)
+            # invBs = cursor['cursor'].fetchone()
+            # if invBs[0] is None:
+            #     equis=0
+            #     invPaidBs.append(equis)
+            # else:
+            #     invPaidBs.append(invBs[0])
 
             initYear = initYear + relativedelta(months=1)
 
-        return json({'data':{'labels':labelsX, 'invoices':invoices, 'po':po,'invPaidDo':invPaidDo,'invPaidBs':invPaidBs} ,'code': 200},200)
+        return json({'data':{'labels':labelsX, 'invoices':invoices, 'po':po,'invPaidDo':invPaidDo} ,'code': 200},200)
     except (Exception, psycopg2.Error)as error:
         return json({'error':str(error),"code":500},500)
