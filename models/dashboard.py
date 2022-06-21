@@ -231,7 +231,7 @@ async def listInvoicesSummary(request):
                 invoicesArr.append(invoicesJson)
             return json({"data":invoicesArr,"code":200},200)
         else:
-            return json({"data":"No se consiguio ninguna factura","code":200},200)
+            return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
@@ -278,7 +278,7 @@ async def listPurchaseOrderSummary(request):
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":purchaseOrdersArr,"code":200},200)
         else:
-            return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
+            return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":error,"code":500},500)

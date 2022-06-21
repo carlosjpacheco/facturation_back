@@ -20,3 +20,13 @@ async def ping(request: Request, token : Token):
 @jwt_required
 async def ping(request: Request, token : Token):
     return await notifications.listNotifications(token.identity)
+
+@n.route('/notifyAllUsers', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await notifications.notifyAllUsers(request.json,token.identity)
+
+@n.route('/notifyUser', methods=['POST'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await notifications.notifyUser(request.json,token.identity)
