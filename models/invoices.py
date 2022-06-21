@@ -1,7 +1,5 @@
 from datetime import datetime
 import os
-import re
-import time
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -144,6 +142,9 @@ async def listInvoices():
                 query_search = """SELECT * from invoice_detail WHERE id_invoice = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
                 detail = cursor["cursor"].fetchall()
+                query_search = """SELECT email from supplier WHERE name = %s"""
+                cursor["cursor"].execute(query_search,(x[9],))
+                supplier_email = cursor["cursor"].fetchone()
                 if x[2] != None:
                     query_search3 = """SELECT * from users where id = %s"""
                     cursor["cursor"].execute(query_search3,(x[2],))
@@ -161,12 +162,14 @@ async def listInvoices():
                     "supplier": x[9],
                     "status":status[1],
                     "date":x[8],
-                    "products":details
+                    "products":details,
+                    "supplier_email":supplier_email[0]
                 }
                 invoicesArr.append(invoicesJson)
+                details = []
             return json({"data":invoicesArr,"code":200},200)
         else:
-            return json({"data":"No se consiguio ninguna factura","code":200},200)
+            return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 

@@ -163,7 +163,7 @@ async def listPurchaseOrder(request):
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
         else:
-            return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
+            return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":error,"code":500},500)
@@ -172,7 +172,7 @@ async def listCurrency():
     try:
         currencyArr = []
         cursor = connectPSQL()
-        query_search = """SELECT * from currency"""
+        query_search = """SELECT * from currency WHERE id = 1"""
         cursor["cursor"].execute(query_search)
         currency = cursor["cursor"].fetchall()
         for x in currency:

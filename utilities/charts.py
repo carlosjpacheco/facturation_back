@@ -60,12 +60,12 @@ async def pay_invoice_pie():
         cursor = connectPSQL()
         query_search = """SELECT COUNT(inv.id)
                             from invoices inv WHERE
-                            inv.paid = False;"""
+                            inv.id_status = 1;"""
         cursor["cursor"].execute(query_search)
         invoice = cursor["cursor"].fetchone()
         query_search = """SELECT COUNT(inv.id)
                             from invoices inv WHERE
-                            inv.paid = True;"""
+                            inv.id_status = 0;"""
         cursor["cursor"].execute(query_search)
         invoiceP = cursor["cursor"].fetchone()
         return json({"data":{"invoice":invoiceP[0],'invoiceP':invoice[0], 'total':invoice[0]+invoiceP[0]},"code":200},200)
@@ -83,14 +83,14 @@ async def pay_invoice_bar():
         while(week < today):
             query_search = """SELECT COUNT(ord.id)
                             from invoices inv WHERE
-                            inv.paid = True
-                            payed_at >= %s and payed_at <= %s;"""
+                            inv.id_status = 0
+                            paid_at >= %s and paid_at <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             orders = cursor["cursor"].fetchone()
             query_search = """SELECT COUNT(ord.id)
                             from invoices inv WHERE
-                            inv.paid = False
-                            payed_at >= %s and payed_at <= %s;"""
+                            inv.id_status = False
+                            paid_at >= %s and paid_at <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             ordersP = cursor["cursor"].fetchone()
             days.append(str(week)[5:10])
