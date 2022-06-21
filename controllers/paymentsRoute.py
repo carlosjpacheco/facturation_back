@@ -12,6 +12,6 @@ def ping(request: Request, token: Token):
     return payments.payInvoice(request.json,token.identity)
 
 @p.route('/execute', methods=['POST'])
-# @jwt_required
-def ping(request: Request):
-    return payments.execute(request.json)
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await payments.sendPayment(request.json,token.identity)

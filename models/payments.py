@@ -4,6 +4,8 @@ import psycopg2
 from sanic.response import json
 from models.notifications import addNotification
 from uuid import uuid4
+from paypalrestsdk import Payout, ResourceNotFound
+import random
 
 async def payInvoice(request,data):
     try:
@@ -25,11 +27,7 @@ async def payInvoice(request,data):
         query="""SELECT * FROM users WHERE id=%s"""
         cursor['cursor'].execute(query,(data,))
         user = cursor['cursor'].fetchone()
-
-        print('HOLAAAAAAAAAAAAAAAAAAAAAA')
-        print(users)
         for x in users:
-            print(x)
             await addNotification({
                 'destination':x,
                 'source':data,
@@ -38,5 +36,31 @@ async def payInvoice(request,data):
         cursor["conn"].commit()
         return json({"data":"Factura #{id} ha sido pagada con éxito".format(id=request['id']),'code':200},200)
     except (Exception,psycopg2.Error) as error:
-        print(error)
         return json({'error':str(error), 'code':500},500)
+
+async def sendPayment(request,data):
+    payout = Payout({
+    "sender_batch_header": {
+        "sender_batch_id": str(uuid4()),
+        "email_subject": request['subject']
+    },
+    "items": [
+        {
+            "recipient_type": "EMAIL",
+            "amount": {
+                "value": request["value"],
+                "currency": "USD"
+            },
+            "receiver": request["receiver"],
+            "note": request["subject"],
+            "sender_item_id": "item_1"
+        }
+        ]
+    })
+
+    if payout.create(sync_mode=False):
+        await payInvoice({'id':request['id']},data)
+        return json({"data":'Pago creado','code':200},200)
+    else:
+        print(payout.error)
+        return json({"error":str(payout.error),"code":500},500)

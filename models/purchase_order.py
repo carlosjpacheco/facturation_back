@@ -163,7 +163,7 @@ async def listPurchaseOrder(request):
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
         else:
-            return json({"data":"No se consiguio ninguna orden de compra","code":200},200)
+            return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":error,"code":500},500)

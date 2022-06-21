@@ -11,6 +11,8 @@ from datetime import timedelta
 from sanic_scheduler import SanicScheduler
 from sanic.log import logger
 from sanic_openapi import openapi2_blueprint
+import paypalrestsdk
+from paypalrestsdk.openid_connect import Tokeninfo
 
 
 app = Sanic("TG")
@@ -30,6 +32,16 @@ app.error_handler.add(ServerError, server_error_handler)
 
 app.config.RESPONSE_TIMEOUT = 4000
 app.config.REQUEST_TIMEOUT = 4000
+
+
+paypalrestsdk.configure({
+    'client_id': 'Ad3vpos-It-NDWk_-8zM60Tqyq7VbY5KM0y1NACQKr5u769yOPzZ-pCuzKXlKjyChKzVjIraWGpDmHn5',
+    'client_secret': 'EBKSS0V5aPL-ElS5TO27tOZV5hDa6u5e8vr_yryuFz9bv7HbbneRNcxPqiE7Ch3Zp-ygflPOjfIm5mp_',
+    'mode':'sandbox',
+    'sync_mode':False
+})
+
+
 with JWT.initialize(app) as manager:
     manager.config.access_token_expires = timedelta(hours=5)
     manager.config.refresh_token_expires = timedelta(weeks=1)

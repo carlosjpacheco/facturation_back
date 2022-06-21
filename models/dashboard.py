@@ -165,6 +165,7 @@ async def amount_paid_inv_by_user():
         from invoices inv,users u, purchase_order po, currency cu
         where inv.id_user = u.id and inv.id_purchase_order = po.id and cu.id = po.id_currency
         and inv.paid_at >= %s
+        and inv.id_status = 0
         group by po.id_currency,u.id, cu.name
         """
         records = (today.timestamp(),)
@@ -339,24 +340,6 @@ async def yearlyChart():
                 invPaidDo.append(equis)
             else:
                 invPaidDo.append(invDo[0])
-
-            # queryInvPaidBs = """
-            # Select SUM(inv.total)
-            # From invoices inv, purchase_order po
-            # Where paid_at >= %s
-            # and paid_at <= %s
-            # and inv.id_purchase_order = po.id
-            # and po.id_currency = 2
-            # and paid = True
-            # """
-            # records = (initYear.timestamp(),(initYear+relativedelta(months=1)).timestamp(),)
-            # cursor['cursor'].execute(queryInvPaidBs,records)
-            # invBs = cursor['cursor'].fetchone()
-            # if invBs[0] is None:
-            #     equis=0
-            #     invPaidBs.append(equis)
-            # else:
-            #     invPaidBs.append(invBs[0])
 
             initYear = initYear + relativedelta(months=1)
 
