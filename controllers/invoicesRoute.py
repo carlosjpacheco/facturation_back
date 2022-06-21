@@ -39,3 +39,13 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return invoices.listInvoices()
+
+@inv.route('/listRobot', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.listInvoicesRobot()
+
+@inv.route('/upload-file', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.uploadFile(request)

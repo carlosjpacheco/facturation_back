@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import re
 import time
 from models.notifications import addNotification
@@ -138,7 +139,7 @@ async def listInvoices():
         if invoices:
             for x in invoices:
                 query_search = """SELECT * from invoices_status WHERE id = %s"""
-                cursor["cursor"].execute(query_search,(x[4],))
+                cursor["cursor"].execute(query_search,(x[3],))
                 status = cursor["cursor"].fetchone()
                 query_search = """SELECT * from invoice_detail WHERE id_invoice = %s"""
                 cursor["cursor"].execute(query_search,(x[0],))
@@ -155,11 +156,52 @@ async def listInvoices():
                 invoicesJson = {
                     "id": x[0],
                     "nro_invoice":x[1],
-                    "total":x[3],
+                    "total":x[11],
                     "user": uservalue,
-                    "supplier": x[10],
+                    "supplier": x[9],
                     "status":status[1],
-                    "date":x[9],
+                    "date":x[8],
+                    "products":details
+                }
+                invoicesArr.append(invoicesJson)
+            return json({"data":invoicesArr,"code":200},200)
+        else:
+            return json({"data":"No se consiguio ninguna factura","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def uploadFile(request):
+    try:
+        file = request.files.get("file")
+        completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
+        file1 = open(completeName, "wb")
+        file1.write(file.body)
+        file1.close()
+        return json({"data":"Exito","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def listInvoicesRobot():
+    try:
+        cursor = connectPSQL()
+        invoicesArr = []
+        details = []
+        query_search = """SELECT * from invoices_robot"""
+        cursor["cursor"].execute(query_search)
+        invoices = cursor["cursor"].fetchall()
+        if invoices:
+            for x in invoices:
+                query_search = """SELECT * from invoice_detail_robot WHERE id_invoice = %s"""
+                cursor["cursor"].execute(query_search,(x[0],))
+                detail = cursor["cursor"].fetchall()
+                for y in detail:
+                    details.append({'amount':y[1],'description':y[2],'quantity':y[3]})
+                invoicesJson = {
+                    "id": x[0],
+                    "nro_invoice":x[1],
+                    "total":x[2],
+                    "supplier": x[4],
+                    "date":x[3],
                     "products":details
                 }
                 invoicesArr.append(invoicesJson)
