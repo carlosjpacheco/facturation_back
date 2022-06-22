@@ -1,3 +1,4 @@
+from datetime import date, datetime
 import time
 from utilities.connections import connectPSQL
 import psycopg2
@@ -30,7 +31,7 @@ async def listNotifications(data):
         notifications = []
         newNotifications=False
         cursor = connectPSQL()
-        query_search = """SELECT * from notifications WHERE destination = %s"""
+        query_search = """SELECT id,description,destination,read,source,date from notifications WHERE destination = %s order by date desc"""
         cursor["cursor"].execute(query_search,(data,))
         noti = cursor["cursor"].fetchall()
         for x in noti:
@@ -41,7 +42,8 @@ async def listNotifications(data):
                 "id":x[0],
                 'description':x[1],
                 'date':x[5],
-                'read':x[3]
+                'read':x[3],
+                'selected':False
             })
         return json({"data":notifications,"newNotification":newNotifications,"lenNewNoti":cont,"code":200},200)
     except(Exception, psycopg2.Error) as error:
@@ -101,3 +103,29 @@ async def notifyUser(request,data):
     except(Exception, psycopg2.Error) as error:
         print(error)
         return json({"error":str(error),"code":500},500)
+
+
+async def readAllNotifications(request,data):
+    try:
+        cursor = connectPSQL()
+        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+        if request['read'] == True:
+            if request['selected'] == []: 
+                query = """UPDATE notifications SET read = true WHERE destination = %s"""
+                cursor['cursor'].execute(query,(data,))
+            else:
+                for x in request['selected']:
+                    query = """UPDATE notifications SET read = true WHERE id = %s"""
+                    cursor['cursor'].execute(query,(x,))
+        else:  
+            if request['selected'] == []:
+                query = """UPDATE notifications SET read = false WHERE destination = %s and date > %s """
+                cursor['cursor'].execute(query,(data,today.timestamp(),))
+            else:
+                for x in request['selected']:
+                    query = """UPDATE notifications SET read = false WHERE id = %s """
+                    cursor['cursor'].execute(query,(x,))
+        cursor['conn'].commit()
+        return json({"data":"Notificaciones marcadas como leidas","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),'code':500},500)
