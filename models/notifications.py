@@ -52,26 +52,49 @@ async def listNotifications(data):
 async def notifyAllUsers(request,data):
     try:
         cursor = connectPSQL()
-        if request['invoices'] == True:
-            query = """ SELECT id_user, nro_invoice FROM invoices WHERE id_status = 1"""
-            cursor['cursor'].execute(query)
-            id_users = cursor['cursor'].fetchall()
-            for x in id_users:
-                await addNotification({
-                    'source':data,
-                    'destination':x[0],
-                    'description':'Se te envio un recordatorio para procesar la factura #{id}'.format(id = x[1])
-                })
-        if request['invoices'] == False:
-            query = """ SELECT id_user, id FROM purchase_order WHERE completed = false"""
-            cursor['cursor'].execute(query)
-            id_users = cursor['cursor'].fetchall()
-            for x in id_users:
-                await addNotification({
-                    'source':data,
-                    'destination':x[0],
-                    'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = x[1])
-                })
+        if request['start_date']=='':
+            if request['invoices'] == True:
+                query = """ SELECT id_user, nro_invoice FROM invoices WHERE id_status = 1"""
+                cursor['cursor'].execute(query)
+                id_users = cursor['cursor'].fetchall()
+                for x in id_users:
+                    await addNotification({
+                        'source':data,
+                        'destination':x[0],
+                        'description':'Se te envio un recordatorio para procesar la factura #{id}'.format(id = x[1])
+                    })
+            if request['invoices'] == False:
+                query = """ SELECT id_user, id FROM purchase_order WHERE completed = false"""
+                cursor['cursor'].execute(query)
+                id_users = cursor['cursor'].fetchall()
+                for x in id_users:
+                    await addNotification({
+                        'source':data,
+                        'destination':x[0],
+                        'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = x[1])
+                    })
+        else:
+            if request['invoices'] == True:
+                query = """ SELECT id_user, nro_invoice FROM invoices WHERE id_status = 1 and created_at > %s and created_at < %s"""
+                cursor['cursor'].execute(query,(request['start_date'].timestamp(),request['end_date'].timestamp()))
+                id_users = cursor['cursor'].fetchall()
+                for x in id_users:
+                    await addNotification({
+                        'source':data,
+                        'destination':x[0],
+                        'description':'Se te envio un recordatorio para procesar la factura #{id}'.format(id = x[1])
+                    })
+            if request['invoices'] == False:
+                query = """ SELECT id_user, id FROM purchase_order WHERE completed = false and date > %s and date < %s"""
+                cursor['cursor'].execute(query,(request['start_date'].timestamp(),request['end_date'].timestamp()))
+                id_users = cursor['cursor'].fetchall()
+                for x in id_users:
+                    await addNotification({
+                        'source':data,
+                        'destination':x[0],
+                        'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = x[1])
+                    })
+
         return json({"data":"Usuarios notificados",'code':200},200)
     except(Exception, psycopg2.Error) as error:
         print(error)
@@ -101,7 +124,6 @@ async def notifyUser(request,data):
             })
         return json({"data":"Usuarios notificados",'code':200},200)
     except(Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 

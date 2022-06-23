@@ -152,12 +152,11 @@ async def assign_user_invoices_line():
             week = today - timedelta(days=21)
             days = []
             amounts = []
-            print(x[0])
             while(week <= today):
                 
                 query = """SELECT count(id) FROM invoices
                         WHERE id_user = %s and
-                        date >= %s and date <= %s"""
+                        created_at >= %s and created_at <= %s"""
                 records = (x[0],week.timestamp(),(week + timedelta(days=1)).timestamp())
                 cursor['cursor'].execute(query,records)
                 count = cursor['cursor'].fetchone()
