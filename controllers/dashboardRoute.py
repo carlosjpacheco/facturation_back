@@ -25,31 +25,31 @@ def ping(request: Request, token : Token):
 
 ########################### Summary last 15 days ################################################
 
-@da.route('/amountPaidInInvoicesLastDays', methods=['GET'])
+@da.route('/amountPaidInInvoicesLastDays', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.amount_paid_in_invoices_lastDay()
+    return  dashboard.amount_paid_in_invoices_lastDay(request.json)
 
-@da.route('/countInvoicesLastDays', methods=['GET'])
+@da.route('/countInvoicesLastDays', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.count_invoices_lastDays()
+    return  dashboard.count_invoices_lastDays(request.json)
 
-@da.route('/countPOLastDays', methods=['GET'])
+@da.route('/countPOLastDays', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.count_pro_unpro_LastDays()
+    return  dashboard.count_pro_unpro_LastDays(request.json)
 
 
-@da.route('/topSupplier', methods=['GET'])
+@da.route('/topSupplier', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.top_supplier_by_TotalInv()
+    return  dashboard.top_supplier_by_TotalInv(request.json)
     
-@da.route('/amountPaidInvByUser', methods=['GET'])
+@da.route('/amountPaidInvByUser', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.amount_paid_inv_by_user()
+    return  dashboard.amount_paid_inv_by_user(request.json)
 
 ########################### Modals ################################################
 
@@ -65,7 +65,13 @@ def ping(request: Request, token : Token):
 
 ########################### Chart ################################################
 
-@da.route('/yearlyChart', methods=['GET'])
+@da.route('/yearlyChart', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return  dashboard.yearlyChart()
+    return  dashboard.yearlyChart(request.json)
+
+@da.route('/selectYears', methods=['GET'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return await dashboard.selectYears()
+

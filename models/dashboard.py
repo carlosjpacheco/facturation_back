@@ -70,19 +70,20 @@ async def count_pro_unpro_daily():
         
 ########################### Summary last 15 days ################################################
 
-async def amount_paid_in_invoices_lastDay():
+async def amount_paid_in_invoices_lastDay(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        today = today - timedelta(days=14)
+        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
             select SUM(inv.total), count(inv.id)
             from invoices inv , purchase_order po
             where inv.paid_at >= %s
+            and inv.paid_at <= %s
             and inv.id_purchase_order = po.id
             group by inv.id
         """
-        records = (today.timestamp(),)
+        records = (start.timestamp(),end.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
         if len(data)==0:
@@ -91,36 +92,38 @@ async def amount_paid_in_invoices_lastDay():
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def count_invoices_lastDays():
+async def count_invoices_lastDays(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        today = today - timedelta(days=14)
+        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select count(id)
         from invoices 
         where created_at >=%s
+        and created_at <=%s
         """
-        records = (today.timestamp(),)
+        records = (start.timestamp(),end.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchone()
         return json({'data':data[0],'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def count_pro_unpro_LastDays():
+async def count_pro_unpro_LastDays(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        today = today - timedelta(days=14)
+        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
             select count(po.id),po.completed
             from purchase_order po
-            where completed_at >= %s or date >= %s
+            where completed_at >= %s and completed_at<=%s
+            or date >= %s and date <=%s
             group by po.completed
 			order by po.completed desc
         """
-        records = (today.timestamp(),today.timestamp(),)
+        records = (start.timestamp(),end.timestamp(),start.timestamp(),end.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
         if len(data)==1 and data[0][1]==False:
@@ -131,23 +134,24 @@ async def count_pro_unpro_LastDays():
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def top_supplier_by_TotalInv():
+async def top_supplier_by_TotalInv(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        today = today - timedelta(days=14)
+        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select count(inv.id),inv.name_supplier,sum(inv.total), cu.name
         from purchase_order po, invoices inv, currency cu
         where inv.id_purchase_order = po.id  
         and inv.id_status = 0
         and paid_at >= %s
+        and paid_at <= %s
         and po.id_currency = cu.id
         group by inv.name_supplier, cu.name
         order by sum(inv.total) desc
         limit 5
         """
-        records = (today.timestamp(),)
+        records = (start.timestamp(),end.timestamp())
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
         return json({'data':data,'code':200},200)
@@ -155,20 +159,21 @@ async def top_supplier_by_TotalInv():
         print(error)
         return json({"error":str(error),"code":500},500)
 
-async def amount_paid_inv_by_user():
+async def amount_paid_inv_by_user(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        today = today - timedelta(days=14)
+        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select sum(inv.total),count(inv.id), u.first_name, u.last_name, cu.name
         from invoices inv,users u, purchase_order po, currency cu
         where inv.id_user = u.id and inv.id_purchase_order = po.id and cu.id = po.id_currency
         and inv.paid_at >= %s
+        and inv.paid_at <= %s
         and inv.id_status = 0
         group by po.id_currency,u.id, cu.name
         """
-        records = (today.timestamp(),)
+        records = (start.timestamp(),end.timestamp())
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
         return json({'data':data,'code':200},200)
@@ -286,7 +291,7 @@ async def listPurchaseOrderSummary(request):
 
 ########################### Chart ################################################
 
-async def yearlyChart():
+async def yearlyChart(request):
     try:
         cursor = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
@@ -346,3 +351,14 @@ async def yearlyChart():
         return json({'data':{'labels':labelsX, 'invoices':invoices, 'po':po,'invPaidDo':invPaidDo} ,'code': 200},200)
     except (Exception, psycopg2.Error)as error:
         return json({'error':str(error),"code":500},500)
+
+
+async def selectYears():
+    year = datetime.strptime("01/01/2018","%d/%m/%Y")
+    years = []
+    month = year.year
+    today = date.today()
+    while month <= today.year:
+        years.append(month)
+        month += 1
+    return json({"data":years,'code':200},200)
