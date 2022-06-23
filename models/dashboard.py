@@ -294,14 +294,19 @@ async def listPurchaseOrderSummary(request):
 async def yearlyChart(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+        today = date.today()
+        if request['start_year']=='' or request['start_year']==str(today.year):
+            today  =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+            initYear = today - relativedelta(months=today.month-1,days=today.day-1)
+        else:
+            today  =datetime.strptime(str(request['start_year'])+"-12-31T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+            initYear = today - relativedelta(months=today.month-1,days=today.day-1)
+
         labelsX = []
         invoices = []
         po = []
         invPaidDo = []
-        invPaidBs = []
-        initYear = today - relativedelta(months=today.month-1,days=today.day-1)
-        while (initYear.month <= today.month):
+        while (initYear.month <= today.month and initYear.year<= today.year):
             datetime_object = datetime.strptime(str(initYear.month), "%m")
             full_month_name = datetime_object.strftime("%B")
             labelsX.append(full_month_name)
@@ -347,6 +352,9 @@ async def yearlyChart(request):
                 invPaidDo.append(invDo[0])
 
             initYear = initYear + relativedelta(months=1)
+            if initYear.month == 12:
+                initYear = initYear + relativedelta(years=1)
+
 
         return json({'data':{'labels':labelsX, 'invoices':invoices, 'po':po,'invPaidDo':invPaidDo} ,'code': 200},200)
     except (Exception, psycopg2.Error)as error:
