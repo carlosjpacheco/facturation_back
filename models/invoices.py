@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -10,13 +11,19 @@ async def addInvoice(request,data):
     try:
         valid = await validInvoice(request)
         if valid == True:
-            cursor = connectPSQL()
-            query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-            records = (request["nro_invoice"],request["id_user"],request["total"],request["id_status"],request["id_purchase_order"],False,data,False,datetime.strptime(request["date"],"%d/%m/%Y").timestamp(),)
-            cursor["cursor"].execute(query_noti,records)
-            cursor["conn"].commit()
-            addInvoiceDetail(request)
-            return json({"data":"Factura creada","code":200},200)
+            query_search = """SELECT * from invoices WHERE nro_invoice = %s and name_supplier = %s"""
+            cursor["cursor"].execute(query_search,(request["nro_invoice"],request["supplier"],))
+            invoice = cursor["cursor"].fetchone()
+            if invoice:
+                return json({"error":"La Factura ya fue procesada","code":500},500)        
+            else:
+                cursor = connectPSQL()
+                query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,None,False,request["date"],request["supplier"],None,)
+                cursor["cursor"].execute(query_noti,records)
+                cursor["conn"].commit()
+                addInvoiceDetail(request)
+                return json({"data":"Factura creada","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
@@ -99,13 +106,14 @@ async def updateInvoiceUser(request,data):
 
 def addInvoiceDetail(request):
     cursor = connectPSQL()
-    query_search = """SELECT * from invoices WHERE nro_invoice = %s"""
-    cursor["cursor"].execute(query_search,(request["nro_invoice"],))
+    query_search = """SELECT * from invoices ORDER BY id DESC limit 1"""
+    cursor["cursor"].execute(query_search)
     invoice = cursor["cursor"].fetchone()
-    query_noti = """INSERT INTO invoice_detail (amount,description,quantity,id_invoice) VALUES (%s,%s,%s,%s)"""
-    records = (request["amount"],request["description"],request["quantity"],invoice[0],)
-    cursor["cursor"].execute(query_noti,records)
-    cursor["conn"].commit()
+    for val in request["products"]:
+        query_noti = """INSERT INTO invoice_detail (amount,description,quantity,id_invoice) VALUES (%s,%s,%s,%s)"""
+        records = (val["amount"],val["description"],int(val["quantity"]),invoice[0],)
+        cursor["cursor"].execute(query_noti,records)
+        cursor["conn"].commit()
 
 async def updateInvoiceDetail(request):
     try:
@@ -160,7 +168,7 @@ async def listInvoices():
                     "user": uservalue,
                     "supplier": x[9],
                     "status":status[1],
-                    "date":x[10],
+                    "date":x[8],
                     "products":details,
                     "supplier_email":supplier_email[0]
                 }
@@ -169,5 +177,68 @@ async def listInvoices():
             return json({"data":invoicesArr,"code":200},200)
         else:
             return json({"data":[],"code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def uploadFile(request):
+    try:
+        file = request.files.get("file")
+        completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
+        file1 = open(completeName, "wb")
+        file1.write(file.body)
+        file1.close()
+        return json({"data":"Exito","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def listInvoicesRobot():
+    try:
+        cursor = connectPSQL()
+        invoicesArr = []
+        details = []
+        query_search = """SELECT * from invoices_robot"""
+        cursor["cursor"].execute(query_search)
+        invoices = cursor["cursor"].fetchall()
+        if invoices:
+            for x in invoices:
+                path = x[5].split("\\")
+                query_search = """SELECT * from invoice_detail_robot WHERE id_invoice = %s"""
+                cursor["cursor"].execute(query_search,(x[0],))
+                detail = cursor["cursor"].fetchall()
+                for y in detail:
+                    details.append({'amount':y[1],'description':y[2],'quantity':y[4]})
+                invoicesJson = {
+                    "id": x[0],
+                    "nro_invoice":x[1],
+                    "total":x[2],
+                    "supplier": x[4],
+                    "date":x[3],
+                    "products":details,
+                    "path": path[1]
+                }
+                invoicesArr.append(invoicesJson)
+            return json({"data":invoicesArr,"code":200},200)
+        else:
+            return json({"data":"No se consiguio ninguna factura","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def delRobotInvoice():
+    try:
+        cursor = connectPSQL()
+        sql_delete_query = """DELETE FROM invoice_detail_robot"""
+        cursor["cursor"].execute(sql_delete_query)
+        cursor["conn"].commit()
+        sql_delete_query = """DELETE FROM invoices_robot"""
+        cursor["cursor"].execute(sql_delete_query)
+        cursor["conn"].commit()
+        return json({"data":"Factura eliminada","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def processInvoice():
+    try:
+        os.system("C:/Users/Usuario/Desktop/Invoices.bat")
+        return json({"data":"Factura Procesada","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

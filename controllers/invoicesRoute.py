@@ -15,6 +15,16 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return invoices.delInvoice(request.json)
 
+@inv.route('/delRobot', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.delRobotInvoice()
+
+@inv.route('/processRobot', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.processInvoice()
+
 @inv.route('/search', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
@@ -39,3 +49,13 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return invoices.listInvoices()
+
+@inv.route('/listRobot', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.listInvoicesRobot()
+
+@inv.route('/upload-file', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.uploadFile(request)
