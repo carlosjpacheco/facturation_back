@@ -29,9 +29,9 @@ async def assign_user_purchaseOrder_bar():
         days = []
         processed = []
         unProcessed = []
-        week = today - timedelta(days=7)
+        week = today - timedelta(days=6)
         cursor = connectPSQL()
-        while(week < today):
+        while(week <= today):
             query_search = """SELECT COUNT(ord.id)
                                 from purchase_order ord WHERE
                                 ord.id not in (SELECT id_purchase_order
@@ -78,9 +78,9 @@ async def pay_invoice_bar():
         days = []
         processed = []
         unProcessed = []
-        week = today - timedelta(days=7)
+        week = today - timedelta(days=6)
         cursor = connectPSQL()
-        while(week < today):
+        while(week <= today):
             query_search = """SELECT COUNT(ord.id)
                             from invoices inv WHERE
                             inv.id_status = 0
@@ -98,6 +98,82 @@ async def pay_invoice_bar():
             unProcessed.append(orders[0])
             week = week + timedelta(days=1)
         return json({"data":{'days':days,'processed':processed,'unProcessed':unProcessed},"code":200},200)
+    except (Exception , psycopg2.Error) as error:
+        print(error)
+        return json({"error":str(error),"code":500})
+
+async def assign_user_purchaseOrder_line():
+    try:
+        cursor = connectPSQL()
+        query = """SELECT * FROM users WHERE id_role = 3"""
+        cursor['cursor'].execute(query)
+        users = cursor['cursor'].fetchall()
+        datasets = []
+        for x in users:
+            today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+            week = today - timedelta(days=21)
+            days = []
+            amounts = []
+            print(x[0])
+            while(week <= today):
+                
+                query = """SELECT count(id) FROM purchase_order
+                        WHERE id_user = %s and
+                        date >= %s and date <= %s"""
+                records = (x[0],week.timestamp(),(week + timedelta(days=1)).timestamp())
+                cursor['cursor'].execute(query,records)
+                count = cursor['cursor'].fetchone()
+                amounts.append(count[0])
+                days.append(str(week)[5:10])
+                week = week + timedelta(days=1)
+            names = x[4].split(' ')
+            names = names[0]
+            last = x[5].split(' ')
+            last = last[0][:1]
+            data = {
+                'data':amounts,'label':names+ ' '+last+'.'
+            }
+            datasets.append(data)
+        print(datasets)
+        return json({"data":{'datasets':datasets,'days':days},"code":200},200)
+    except (Exception , psycopg2.Error) as error:
+        print(error)
+        return json({"error":str(error),"code":500})
+
+async def assign_user_invoices_line():
+    try:
+        cursor = connectPSQL()
+        query = """SELECT * FROM users WHERE id_role = 5"""
+        cursor['cursor'].execute(query)
+        users = cursor['cursor'].fetchall()
+        datasets = []
+        for x in users:
+            today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+            week = today - timedelta(days=21)
+            days = []
+            amounts = []
+            print(x[0])
+            while(week <= today):
+                
+                query = """SELECT count(id) FROM invoices
+                        WHERE id_user = %s and
+                        date >= %s and date <= %s"""
+                records = (x[0],week.timestamp(),(week + timedelta(days=1)).timestamp())
+                cursor['cursor'].execute(query,records)
+                count = cursor['cursor'].fetchone()
+                amounts.append(count[0])
+                days.append(str(week)[5:10])
+                week = week + timedelta(days=1)
+            names = x[4].split(' ')
+            names = names[0]
+            last = x[5].split(' ')
+            last = last[0][:1]
+            data = {
+                'data':amounts,'label':names+ ' '+last+'.'
+            }
+            datasets.append(data)
+        print(datasets)
+        return json({"data":{'datasets':datasets,'days':days},"code":200},200)
     except (Exception , psycopg2.Error) as error:
         print(error)
         return json({"error":str(error),"code":500})
