@@ -59,3 +59,9 @@ def ping(request: Request):
 def ping(request: Request,token:Token):
     request.json["preview"]= True
     return purchase_order.addPurchaseOrder(request.json,token.identity)
+
+@po.route('/report', methods=['POST'])
+# @jwt_required
+def ping(request: Request):
+    
+    return pdf.pdfReport(request.json)

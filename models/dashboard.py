@@ -278,7 +278,8 @@ async def listPurchaseOrderSummary(request):
                     "date":x[9],
                     "user": uservalue,
                     "supplier":supplier[1],
-                    "currency": currency
+                    "currency": currency,
+                    "completed":x[2]
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":purchaseOrdersArr,"code":200},200)
