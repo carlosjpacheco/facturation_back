@@ -40,7 +40,6 @@ def sendPurchaseOrder():
         server.login(message['From'], password)
         text = message.as_string()
         server.sendmail(message['From'], message['To'],text)
-        print("LO MANDE")
         server.quit()
     except Exception as error:
          return json({"data":error,"code":500},500)
@@ -69,5 +68,4 @@ def sendPswAdm(destinatario,msgA):
 
         server.quit()
     except Exception as error:
-        print(error)
         return json({"data":str(error),"code":500},500)

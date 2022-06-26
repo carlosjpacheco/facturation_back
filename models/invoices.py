@@ -101,7 +101,6 @@ async def updateInvoiceUser(request,data):
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 def addInvoiceDetail(request):

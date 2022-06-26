@@ -100,7 +100,6 @@ async def addPurchaseOrderDetail(request,data):
 
     sql_update = """Update purchase_order set path=%s where id = %s"""
     cursor["cursor"].execute(sql_update,(path,purchaseOrder[0],))
-    print(products)
     query_noti = """INSERT INTO detail_purchase_order (id_purchase_order,created_at,products) VALUES (%s,%s,%s)"""
     records = (purchaseOrder[0],datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),products,)
     cursor["cursor"].execute(query_noti,records)
@@ -123,7 +122,6 @@ async def updatePurchaseOrder(request,data):
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def listPurchaseOrder(request):
@@ -165,7 +163,6 @@ async def listPurchaseOrder(request):
         else:
             return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":error,"code":500},500)
 
 async def listCurrency():

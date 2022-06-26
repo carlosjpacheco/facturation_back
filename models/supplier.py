@@ -50,7 +50,6 @@ async def updateSupplier(request):
         cursor = connectPSQL()
         valid = await validUpdateSupplier(request)
         if valid == True:
-            print(request)
             sql_update = """Update supplier set name=%s, rif=%s, fiscal_direction=%s, phone=%s, email=%s, contact_name=%s,
                                 contact_lastname=%s, contact_email=%s, contact_phone=%s where id = %s"""
             cursor["cursor"].execute(sql_update,(request["name"],request["rif"],request["fiscal_direction"],

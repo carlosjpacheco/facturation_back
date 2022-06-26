@@ -97,7 +97,6 @@ async def notifyAllUsers(request,data):
 
         return json({"data":"Usuarios notificados",'code':200},200)
     except(Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 

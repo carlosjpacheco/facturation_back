@@ -9,7 +9,6 @@ import random
 
 async def payInvoice(request,data):
     try:
-        print(request)
         cursor = connectPSQL()
         date = datetime.now().timestamp()
         query = """
@@ -62,5 +61,4 @@ async def sendPayment(request,data):
         await payInvoice({'id':request['id']},data)
         return json({"data":'Pago creado','code':200},200)
     else:
-        print(payout.error)
         return json({"error":str(payout.error),"code":500},500)

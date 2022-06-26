@@ -20,12 +20,10 @@ async def amount_paid_in_invoices_daily():
         records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
-        print(data)
         if len(data)==0:
             data = [[0,0]]
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def count_invoices_daily():
@@ -156,7 +154,6 @@ async def top_supplier_by_TotalInv(request):
         data = cursor['cursor'].fetchall()
         return json({'data':data,'code':200},200)
     except (Exception , psycopg2.Error)as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def amount_paid_inv_by_user(request):
@@ -242,7 +239,6 @@ async def listInvoicesSummary(request):
 
 async def listPurchaseOrderSummary(request):
     try:
-        print(request)
         cursor = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         if request['daily']==False:
@@ -286,7 +282,6 @@ async def listPurchaseOrderSummary(request):
         else:
             return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":error,"code":500},500)
 
 

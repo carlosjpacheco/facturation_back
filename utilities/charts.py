@@ -52,7 +52,6 @@ async def assign_user_purchaseOrder_bar():
             week = week + timedelta(days=1)
         return json({"data":{'days':days,'processed':processed,'unProcessed':unProcessed},"code":200},200)
     except (Exception , psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500})
 
 async def pay_invoice_pie():
@@ -99,7 +98,6 @@ async def pay_invoice_bar():
             week = week + timedelta(days=1)
         return json({"data":{'days':days,'processed':processed,'unProcessed':unProcessed},"code":200},200)
     except (Exception , psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500})
 
 async def assign_user_purchaseOrder_line():
@@ -114,7 +112,6 @@ async def assign_user_purchaseOrder_line():
             week = today - timedelta(days=21)
             days = []
             amounts = []
-            print(x[0])
             while(week <= today):
                 
                 query = """SELECT count(id) FROM purchase_order
@@ -134,10 +131,8 @@ async def assign_user_purchaseOrder_line():
                 'data':amounts,'label':names+ ' '+last+'.'
             }
             datasets.append(data)
-        print(datasets)
         return json({"data":{'datasets':datasets,'days':days},"code":200},200)
     except (Exception , psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500})
 
 async def assign_user_invoices_line():
@@ -171,8 +166,6 @@ async def assign_user_invoices_line():
                 'data':amounts,'label':names+ ' '+last+'.'
             }
             datasets.append(data)
-        print(datasets)
         return json({"data":{'datasets':datasets,'days':days},"code":200},200)
     except (Exception , psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500})

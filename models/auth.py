@@ -361,7 +361,6 @@ async def updatePassword(request):
         valid = await validUpdateUser(request)
         if valid == True:
             request['new_password'] = base64.b64encode(request['new_password'].encode("utf-8")).decode()
-            print("PASO")
             sql_update_query = """Update users set psw = %s , username=%s where id = %s"""
             cursor["cursor"].execute(sql_update_query, (request["new_password"],request["username"],request["id"],))
             query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""

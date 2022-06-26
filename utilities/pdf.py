@@ -123,7 +123,6 @@ async def showPDF(request):
         return json({"data":archivo,"code":200},200)
 
     except Exception as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 
@@ -140,7 +139,6 @@ async def pdfReport(request):
                     user = user[0]+ ' '+ user[2]
                 else:
                     user = user[0]+ ' '+ user[1]
-                print(datetime.fromtimestamp(str(x['date'])))
                 row = [x['nro_invoice'],x['total'],x['user'],x['supplier'],x['status'],str(datetime.fromtimestamp(x['date']))[:10]]
                 answers3.append(row)
         else:
@@ -158,9 +156,6 @@ async def pdfReport(request):
 
                 row = [x['nro_order'],user,x['supplier'],x['currency'][0],x['completed'],str(datetime.fromtimestamp(x['date']))[:10]]
                 answers3.append(row)
-
-        # if os.path.exists(url_reports+"report_{id}.pdf".format(id= str(uuid4()))):
-        #     os.remove(url_reports+"report_{id}.pdf".format(id= str(uuid4())))
 
         doc = SimpleDocTemplate("report_{id}.pdf".format(id=id), pagesize=letter,
                         rightMargin=72, leftMargin=72,

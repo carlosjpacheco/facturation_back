@@ -12,12 +12,9 @@ def encodePsw(password):
     
 def decodePsw(password):
     try:
-        print(password)
         base64_bytes = password.encode('ascii')
         message_bytes = base64.b64decode(base64_bytes)
         message = message_bytes.decode('ascii')
-        print(message)
         return message
     except Exception as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
