@@ -115,7 +115,7 @@ async def updateUser(request):
                 sql_update_query = """Update users set dni_rif = %s where id = %s"""
                 cursor["cursor"].execute(sql_update_query, (request["dni_rif"],request["id"],))
             query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
-            records_history = ('Actualizo el Usuario '+request["username"],request["user_created"],datetime.now(),)
+            records_history = ('Actualizo el usuario '+request["first_name"]+' '+request['last_name'],request["user_created"],datetime.now(),)
             cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
             return json({"data":"Usuario actualizado con éxito","code":200},200)

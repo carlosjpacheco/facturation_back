@@ -19,7 +19,7 @@ async def addInvoice(request,data):
             else:
                 cursor = connectPSQL()
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,None,False,request["date"],request["supplier"],None,)
+                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,)
                 cursor["cursor"].execute(query_noti,records)
                 cursor["conn"].commit()
                 addInvoiceDetail(request)
@@ -167,7 +167,7 @@ async def listInvoices():
                     "user": uservalue,
                     "supplier": x[9],
                     "status":status[1],
-                    "date":x[8],
+                    "date":x[6],
                     "products":details,
                     "supplier_email":supplier_email[0]
                 }
