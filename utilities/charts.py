@@ -109,7 +109,7 @@ async def assign_user_purchaseOrder_line():
         datasets = []
         for x in users:
             today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
-            week = today - timedelta(days=21)
+            week = today - timedelta(days=6)
             days = []
             amounts = []
             while(week <= today):
@@ -144,7 +144,7 @@ async def assign_user_invoices_line():
         datasets = []
         for x in users:
             today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
-            week = today - timedelta(days=21)
+            week = today - timedelta(days=6)
             days = []
             amounts = []
             while(week <= today):
