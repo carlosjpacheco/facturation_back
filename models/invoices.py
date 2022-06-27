@@ -11,13 +11,13 @@ async def addInvoice(request,data):
     try:
         valid = await validInvoice(request)
         if valid == True:
+            cursor = connectPSQL()
             query_search = """SELECT * from invoices WHERE nro_invoice = %s and name_supplier = %s"""
             cursor["cursor"].execute(query_search,(request["nro_invoice"],request["supplier"],))
             invoice = cursor["cursor"].fetchone()
             if invoice:
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
-                cursor = connectPSQL()
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,None,False,request["date"],request["supplier"],None,)
                 cursor["cursor"].execute(query_noti,records)
