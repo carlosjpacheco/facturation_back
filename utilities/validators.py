@@ -10,17 +10,17 @@ async def validSignup(request):
         username_query= """SELECT * FROM users WHERE username= %s"""
         cursor['cursor'].execute(username_query,(request['username'],))
         if cursor["cursor"].fetchone():
-            return json({"error":"Username no disponible","code":500},500)
+            return json({"error":"Username no disponible","code":501},501)
     if "dni_rif" in request:
         dni_rif_query= """SELECT * FROM users WHERE dni_rif= %s"""
         cursor['cursor'].execute(dni_rif_query,(request['dni_rif'],))
         if cursor["cursor"].fetchone():
             return json({"error":"Ya existe un usuario con ese Nro. de Cedula","code":500},500)
-    if "rif" in request:
-        dni_rif_query= """SELECT * FROM supplier WHERE rif= %s"""
-        cursor['cursor'].execute(dni_rif_query,(request['rif'],))
+    if "email" in request:
+        dni_rif_query= """SELECT * FROM supplier WHERE email= %s"""
+        cursor['cursor'].execute(dni_rif_query,(request['email'],))
         if cursor["cursor"].fetchone():
-            return json({"error":"Ya existe un proveedor con el mismo numero de rif","code":500},500)
+            return json({"error":"Ya existe un usuario con ese email","code":502},502)
     return True
 
 async def validUpdateUser(request):
