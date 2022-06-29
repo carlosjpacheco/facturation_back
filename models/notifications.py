@@ -140,8 +140,8 @@ async def readAllNotifications(request,data):
                     cursor['cursor'].execute(query,(x,))
         else:  
             if request['selected'] == []:
-                query = """UPDATE notifications SET read = false WHERE destination = %s and date > %s """
-                cursor['cursor'].execute(query,(data,today.timestamp(),))
+                query = """UPDATE notifications SET read = false WHERE destination = %s """
+                cursor['cursor'].execute(query,(data,))
             else:
                 for x in request['selected']:
                     query = """UPDATE notifications SET read = false WHERE id = %s """

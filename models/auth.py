@@ -9,12 +9,13 @@ import psycopg2
 from sanic.response import json
 from utilities.validators import validSignup, validUpdateUser
 import random
-from utilities.sendEmails import sendPswAdm
+from utilities.sendEmails import sendPswAdm,updatePsw, userRegistered
 
 async def signup(request):
     try:
         valid = await validSignup(request)
         cursor = connectPSQL()
+        psw = request['psw']
         request['psw'] = request['psw'].encode("utf-8")
         request['psw'] = base64.b64encode(request['psw']).decode()
         if valid == True:
@@ -25,6 +26,7 @@ async def signup(request):
             records_history = ('Agregó un Nuevo Usuario',request["user_created"],datetime.now(),)
             cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
+            userRegistered(request['email'],"Usuario registrado",{'username':request['username'],'psw':psw})
             return json({"data":"Usuario creado con éxito","code":200},200)
         else:
             return valid
@@ -357,7 +359,7 @@ async def updatePassword(request):
         query_search = """SELECT * from users WHERE id = %s"""
         cursor["cursor"].execute(query_search,(request["id"],))
         user = cursor["cursor"].fetchone()
-        
+        new_psw = request['new_password']
         valid = await validUpdateUser(request)
         if valid == True:
             request['new_password'] = base64.b64encode(request['new_password'].encode("utf-8")).decode()
@@ -367,6 +369,7 @@ async def updatePassword(request):
             records_history = ('Actualizó las Credenciales del Usuario '+request["username"],request["user_created"],datetime.now(),)
             cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
+            updatePsw(user[9],"Actualización de contraseña",{'username':request['username'],"psw":new_psw})
             return json({"data":"Contrasena actualizada con éxito","code":200},200)
         else:
             return valid
@@ -380,7 +383,7 @@ async def forgotPassword(request):
         cursor["cursor"].execute(sql_select_query, (request["username"],))
         user = cursor["cursor"].fetchone()
         dec = base64.b64decode(user[2]).decode()
-        sendPswAdm(user[9],'Su contraseña es:'+dec)
+        sendPswAdm(user[9],'Recuperación de contraseña',{'psw':dec})
         return json({"data":"Se le ha enviado un correo con la recuperación de su contraseña","code":200},200)
     except Exception as error:
          return json({"data":str(error),"code":500},500)
