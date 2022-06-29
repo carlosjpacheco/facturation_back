@@ -128,7 +128,9 @@ async def count_pro_unpro_LastDays(request):
         if len(data)==1 and data[0][1]==False:
             data.insert(0,[0,0])
         if len(data)==1 and data[0][1]==True:
-            data.append([0,[0,0]])
+            data.append([0,0])
+        if len(data)==0:
+            data = [[0,0],[0,0]]
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

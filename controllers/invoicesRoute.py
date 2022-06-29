@@ -30,6 +30,11 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return invoices.readInvoice(request.json)
 
+@inv.route('/delPDFRobot', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.deleteRobotInvoicePDF(request.json)
+
 @inv.route('/update', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
@@ -45,10 +50,10 @@ def ping(request: Request, token : Token):
 def ping(request: Request, token : Token):
     return invoices.readInvoice(request.json)
 
-@inv.route('/list', methods=['GET'])
+@inv.route('/list', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return invoices.listInvoices()
+    return invoices.listInvoices(request.json)
 
 @inv.route('/listRobot', methods=['GET'])
 @jwt_required
