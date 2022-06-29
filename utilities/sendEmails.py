@@ -50,7 +50,7 @@ def sendPswAdm(destinatario,msgA,request):
         msg = EmailMessage()
         password = "bxbgeryvljjkccvg"
         msg['From'] = 'carlosjpa1305@gmail.com'
-        msg['To'] = 'carlosjpa13@gmail.com'
+        msg['To'] = destinatario
         msg['Subject']='LoreBI CA'
         msg.attach(MIMEText(msgA, 'plain'))
         msg.set_content('''
@@ -85,7 +85,7 @@ def updatePsw(destinatario,msgA,request):
         msg = EmailMessage()
         password = "bxbgeryvljjkccvg"
         msg['From'] = 'carlosjpa1305@gmail.com'
-        msg['To'] = 'carlosjpa13@gmail.com'
+        msg['To'] = destinatario
         msg['Subject']='LoreBI CA'
         msg.attach(MIMEText(msgA, 'plain'))
         msg.set_content('''
@@ -121,7 +121,7 @@ def userRegistered(destinatario,msgA,request):
         msg = EmailMessage()
         password = "bxbgeryvljjkccvg"
         msg['From'] = 'carlosjpa1305@gmail.com'
-        msg['To'] = 'carlosjpa13@gmail.com'
+        msg['To'] = destinatario
         msg['Subject']='LoreBI CA'
         msg.attach(MIMEText(msgA, 'plain'))
         msg.set_content('''
