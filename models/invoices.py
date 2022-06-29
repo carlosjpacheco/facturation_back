@@ -3,6 +3,7 @@ import os
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
+import shutil 
 from sanic.response import json
 
 from utilities.validators import validInvoice
@@ -11,18 +12,19 @@ async def addInvoice(request,data):
     try:
         valid = await validInvoice(request)
         if valid == True:
+            cursor = connectPSQL()
             query_search = """SELECT * from invoices WHERE nro_invoice = %s and name_supplier = %s"""
             cursor["cursor"].execute(query_search,(request["nro_invoice"],request["supplier"],))
             invoice = cursor["cursor"].fetchone()
             if invoice:
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
-                cursor = connectPSQL()
-                query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,)
+                query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],)
                 cursor["cursor"].execute(query_noti,records)
                 cursor["conn"].commit()
                 addInvoiceDetail(request)
+                shutil.move("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/"+request["path"],"C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices")
                 return json({"data":"Factura creada","code":200},200)
         else:
             return valid
@@ -132,14 +134,20 @@ async def updateInvoiceDetail(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def listInvoices():
+async def listInvoices(request):
     try:
         cursor = connectPSQL()
         invoicesArr = []
         details = []
-        query_search = """SELECT * from invoices"""
-        cursor["cursor"].execute(query_search)
-        invoices = cursor["cursor"].fetchall()
+        if request['role'] == 1 or request['role'] == 4:
+            query_search = """SELECT * from invoices"""
+            cursor["cursor"].execute(query_search)
+            invoices = cursor["cursor"].fetchall()
+        else:
+            query_search = """SELECT * from invoices where id_user = %s order by id desc"""
+            cursor["cursor"].execute(query_search,(request['id_user'],))
+            invoices = cursor["cursor"].fetchall()   
+        
         if invoices:
             for x in invoices:
                 query_search = """SELECT * from invoices_status WHERE id = %s"""
@@ -169,7 +177,8 @@ async def listInvoices():
                     "status":status[1],
                     "date":x[6],
                     "products":details,
-                    "supplier_email":supplier_email[0]
+                    "supplier_email":supplier_email[0],
+                    "path": x[12]
                 }
                 invoicesArr.append(invoicesJson)
                 details = []
@@ -183,10 +192,14 @@ async def uploadFile(request):
     try:
         file = request.files.get("file")
         completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
+        completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", file.name)
         file1 = open(completeName, "wb")
         file1.write(file.body)
         file1.close()
-        return json({"data":"Exito","code":200},200)
+        file2 = open(completeName1, "wb")
+        file2.write(file.body)
+        file2.close()
+        return json({"data":"Exito","path":file.name,"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
@@ -239,5 +252,15 @@ async def processInvoice():
     try:
         os.system("C:/Users/Usuario/Desktop/Invoices.bat")
         return json({"data":"Factura Procesada","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def deleteRobotInvoicePDF(request):
+    try:
+        completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", request["path"])
+        completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", request["path"])
+        os.remove(completeName1)
+        os.remove(completeName)
+        return json({"data":"PDF Eliminado","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

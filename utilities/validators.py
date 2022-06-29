@@ -96,7 +96,7 @@ async def validRol(request):
     return True
 
 async def validInvoice(request):
-    cursor = connectPSQL()
+    # cursor = connectPSQL()
     # if 'nro_invoice' in request:
     #     sql_query = """SELECT * from invoices WHERE nro_invoice=%s"""
     #     cursor["cursor"].execute(sql_query,(request["nro_invoice"],))
@@ -104,12 +104,12 @@ async def validInvoice(request):
     #     if invoice:
     #            return json({"error":"Ya tiene una factura agregada con e mismo número de referencia","code":500},500)
 
-    if 'nit' in request:
-        sql_query = """SELECT * from invoices WHERE nit=%s"""
-        cursor["cursor"].execute(sql_query,(request["nit"],))
-        invoice = cursor["cursor"].fetchone()   
-        if invoice:
-               return json({"error":"Ya tiene una factura agregada con e mismo número de nit","code":500},500)
+    # if 'nit' in request:
+    #     sql_query = """SELECT * from invoices WHERE nit=%s"""
+    #     cursor["cursor"].execute(sql_query,(request["nit"],))
+    #     invoice = cursor["cursor"].fetchone()   
+    #     if invoice:
+    #            return json({"error":"Ya tiene una factura agregada con e mismo número de nit","code":500},500)
     return True
 
 

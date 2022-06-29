@@ -15,8 +15,8 @@ from utilities.connections import connectPSQL
 from utilities.sendEmails import sendPurchaseOrder
 import shutil 
 import os
-url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
-# url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
+# url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
 url_reports = '/home/carlos/Desktop/tg/reports/'
 
 async def pdfPurchaseOrder(request,data):
