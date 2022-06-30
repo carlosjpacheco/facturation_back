@@ -130,14 +130,28 @@ async def listPurchaseOrder(request):
     try:
         cursor = connectPSQL()
         purchaseOrdersArr = []
-        if request['role'] == 1 or request['role'] == 2:
-            query_search = """SELECT * from purchase_order order by id desc"""
-            cursor["cursor"].execute(query_search)
-            purchaseOrders = cursor["cursor"].fetchall()
+        print(request)
+        if request['start_date'] == '':
+            if request['role'] == 1 or request['role'] == 2:
+                query_search = """SELECT * from purchase_order order by id desc"""
+                cursor["cursor"].execute(query_search)
+                purchaseOrders = cursor["cursor"].fetchall()
+            else:
+                query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],))
+                purchaseOrders = cursor["cursor"].fetchall()
         else:
-            query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
-            cursor["cursor"].execute(query_search,(request['id_user'],))
-            purchaseOrders = cursor["cursor"].fetchall()
+            start_date = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+            end_date = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
+            print(start_date)
+            if request['role'] == 1 or request['role'] == 2:
+                query_search = """SELECT * from purchase_order where date>= %s and date <=%s order by id desc"""
+                cursor["cursor"].execute(query_search,(start_date.timestamp(),end_date.timestamp()))
+                purchaseOrders = cursor["cursor"].fetchall()
+            else:
+                query_search = """SELECT * from purchase_order where id_user = %s and date>= %s and date <=%s order by id desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],start_date.timestamp(),end_date.timestamp()))
+                purchaseOrders = cursor["cursor"].fetchall()
 
         if purchaseOrders:
             for x in purchaseOrders:

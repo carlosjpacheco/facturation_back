@@ -72,8 +72,8 @@ async def count_pro_unpro_daily():
 async def amount_paid_in_invoices_lastDay(request):
     try:
         cursor = connectPSQL()
-        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
-        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
             select SUM(inv.total), count(inv.id)
             from invoices inv , purchase_order po
@@ -94,8 +94,8 @@ async def amount_paid_in_invoices_lastDay(request):
 async def count_invoices_lastDays(request):
     try:
         cursor = connectPSQL()
-        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
-        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select count(id)
         from invoices 
@@ -112,8 +112,8 @@ async def count_invoices_lastDays(request):
 async def count_pro_unpro_LastDays(request):
     try:
         cursor = connectPSQL()
-        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
-        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
             select count(po.id),po.completed
             from purchase_order po
@@ -138,8 +138,8 @@ async def count_pro_unpro_LastDays(request):
 async def top_supplier_by_TotalInv(request):
     try:
         cursor = connectPSQL()
-        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
-        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select count(inv.id),inv.name_supplier,sum(inv.total), cu.name
         from purchase_order po, invoices inv, currency cu
@@ -162,8 +162,8 @@ async def top_supplier_by_TotalInv(request):
 async def amount_paid_inv_by_user(request):
     try:
         cursor = connectPSQL()
-        start = datetime.strptime(request['start_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
-        end = datetime.strptime(request['end_date'][:18]+'Z',"%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         query = """
         select sum(inv.total),count(inv.id), u.first_name, u.last_name, cu.name
         from invoices inv,users u, purchase_order po, currency cu
