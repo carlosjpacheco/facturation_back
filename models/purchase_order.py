@@ -61,20 +61,26 @@ async def readPurchaseOrder(request):
         query_search = """SELECT * from purchase_order WHERE id = %s"""
         cursor["cursor"].execute(query_search,(request["id"],))
         purchaseOrder = cursor["cursor"].fetchone()
-        query_search2 = """SELECT * from detail_purchase_order WHERE id_purchase_order = %s"""
-        cursor["cursor"].execute(query_search2,(request["id"],))
-        detailPurchaseOrder = cursor["cursor"].fetchone()
         if purchaseOrder:
-            for x in detailPurchaseOrder[3]:
+            query_search2 = """SELECT * from detail_purchase_order WHERE id_purchase_order = %s"""
+            cursor["cursor"].execute(query_search2,(request["id"],))
+            detailPurchaseOrder = cursor["cursor"].fetchone()
+            query = """SELECT * from supplier WHERE id = %s"""
+            cursor["cursor"].execute(query,(purchaseOrder[4],))
+            supp = cursor["cursor"].fetchone()
+            for x in detailPurchaseOrder[2]:
                 products = {
-                    "product":x[0],
+                    "product":x[0][1:-1],
                     "description":x[1],
                     "amount":x[2]
                 }
                 product.append(products)
             return json({"data":{
                 "nro_order":purchaseOrder[1],
-                "created_at":detailPurchaseOrder[2],
+                "created_at":detailPurchaseOrder[3],
+                "completed":purchaseOrder[2],
+                "supplier":supp[1],
+                "email":supp[5],
                 "products":product
             },"code":200},200)    
         else:
@@ -138,28 +144,41 @@ async def listPurchaseOrder(request,data):
     try:
         cursor = connectPSQL()
         purchaseOrdersArr = []
-        if request['role'] == 1 or request['role'] == 2:
-            query_search = """SELECT * from purchase_order order by id desc"""
-            cursor["cursor"].execute(query_search)
-            purchaseOrders = cursor["cursor"].fetchall()
 
-        elif request['role'] == 10:
-            query_search = """SELECT firts_name from users WHERE id = %s"""
-            cursor["cursor"].execute(query_search,(data,))
-            user = cursor["cursor"].fetchone()
-            if user:
-                query_search = """SELECT id from supplier WHERE name = %s"""
-                cursor["cursor"].execute(query_search,(user[0],))
-                supplier = cursor["cursor"].fetchone()
+        if request['start_date'] == '':
+            if request['role'] == 1 or request['role'] == 2:
+                query_search = """SELECT * from purchase_order order by id desc"""
+                cursor["cursor"].execute(query_search)
+                purchaseOrders = cursor["cursor"].fetchall()
+            elif request['role'] == 10:
+                query_search = """SELECT firts_name from users WHERE id = %s"""
+                cursor["cursor"].execute(query_search,(data,))
+                user = cursor["cursor"].fetchone()
+                if user:
+                    query_search = """SELECT id from supplier WHERE name = %s"""
+                    cursor["cursor"].execute(query_search,(user[0],))
+                    supplier = cursor["cursor"].fetchone()
 
-                if supplier:
-                    query_search = """SELECT * from purchase_order WHERE id_supplier = %s order by id desc"""
-                    cursor["cursor"].execute(query_search,(supplier[0],))
-                    purchaseOrders = cursor["cursor"].fetchall()
+                    if supplier:
+                        query_search = """SELECT * from purchase_order WHERE id_supplier = %s order by id desc"""
+                        cursor["cursor"].execute(query_search,(supplier[0],))
+                        purchaseOrders = cursor["cursor"].fetchall()
+            else:
+                query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],))
+                purchaseOrders = cursor["cursor"].fetchall()
         else:
-            query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
-            cursor["cursor"].execute(query_search,(request['id_user'],))
-            purchaseOrders = cursor["cursor"].fetchall()
+            start_date = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+            end_date = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
+            print(start_date)
+            if request['role'] == 1 or request['role'] == 2:
+                query_search = """SELECT * from purchase_order where date>= %s and date <=%s order by id desc"""
+                cursor["cursor"].execute(query_search,(start_date.timestamp(),end_date.timestamp()))
+                purchaseOrders = cursor["cursor"].fetchall()
+            else:
+                query_search = """SELECT * from purchase_order where id_user = %s and date>= %s and date <=%s order by id desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],start_date.timestamp(),end_date.timestamp()))
+                purchaseOrders = cursor["cursor"].fetchall()
 
         if purchaseOrders:
             for x in purchaseOrders:

@@ -147,23 +147,33 @@ async def listInvoices(request,data):
         cursor = connectPSQL()
         invoicesArr = []
         details = []
-        if request['role'] == 1 or request['role'] == 4:
-            query_search = """SELECT * from invoices"""
-            cursor["cursor"].execute(query_search)
-            invoices = cursor["cursor"].fetchall()
-
-        elif request['role'] == 10:
-            query_search = """SELECT firts_name from users WHERE id = %s"""
-            cursor["cursor"].execute(query_search,(data,))
-            user = cursor["cursor"].fetchone()
-            if user:
-                query_search = """SELECT * from invoices where name_supplier = %s"""
-                cursor["cursor"].execute(query_search,(user[0],))
+        if request['start_date'] == '':
+            if request['role'] == 1 or request['role'] == 4:
+                query_search = """SELECT * from invoices"""
+                cursor["cursor"].execute(query_search)
+                invoices = cursor["cursor"].fetchall()
+            elif request['role'] == 10:
+                query_search = """SELECT firts_name from users WHERE id = %s"""
+                cursor["cursor"].execute(query_search,(data,))
+                user = cursor["cursor"].fetchone()
+                if user:
+                    query_search = """SELECT * from invoices where name_supplier = %s"""
+                    cursor["cursor"].execute(query_search,(user[0],))
+            else:
+                query_search = """SELECT * from invoices where id_user = %s order by created_at desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],))
                 invoices = cursor["cursor"].fetchall()
         else:
-            query_search = """SELECT * from invoices where id_user = %s order by id desc"""
-            cursor["cursor"].execute(query_search,(request['id_user'],))
-            invoices = cursor["cursor"].fetchall()   
+            start_date = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+            end_date = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
+            if request['role'] == 1 or request['role'] == 4:
+                query_search = """SELECT * from invoices WHERE created_at >= %s AND created_at<=%s"""
+                cursor["cursor"].execute(query_search,(start_date.timestamp(),end_date.timestamp()))
+                invoices = cursor["cursor"].fetchall()
+            else:
+                query_search = """SELECT * from invoices where id_user = %s order and created_at >= %s AND created_at<=%s by created_at desc"""
+                cursor["cursor"].execute(query_search,(request['id_user'],start_date.timestamp(),end_date.timestamp()))
+                invoices = cursor["cursor"].fetchall()
         
         if invoices:
             for x in invoices:
@@ -195,7 +205,8 @@ async def listInvoices(request,data):
                     "date":x[6],
                     "products":details,
                     "supplier_email":supplier_email[0],
-                    "path": x[12]
+                    "path": x[12],
+                    "id_purchase_order":x[4]
                 }
                 invoicesArr.append(invoicesJson)
                 details = []
