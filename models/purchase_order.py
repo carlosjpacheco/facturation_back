@@ -1,7 +1,4 @@
-from audioop import add
 from datetime import datetime
-from importlib.resources import path
-from locale import currency
 import time
 from utilities.connections import connectPSQL
 import psycopg2
@@ -10,8 +7,7 @@ from sanic.response import json
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
 from models.notifications import addNotification
-from utilities.charts import assign_user_purchaseOrder_bar
-
+from utilities.sendEmails import sendPurchaseOrder
 async def addPurchaseOrder(request,data):
     try:
         valid = await validPurchaseOrder(request)

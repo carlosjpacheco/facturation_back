@@ -4,19 +4,18 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-from unicodedata import name
 from sanic.response import json
 from email.message import EmailMessage
 
-def sendPurchaseOrder():
+def sendPurchaseOrder(destiny,po_id):
     try:
         message = MIMEMultipart()
 
-        password = "26473558cj"
-        message['From'] = 'carlosp@diemo.com.ve'
-        message['To'] = 'carlosp@diemo.com.ve'
+        password = "bxbgeryvljjkccvg"
+        message['From'] = 'carlosjpa1305@gmail.com'
+        message['To'] = destiny
         message['Subject']="LoreBi"
-        message.attach(MIMEText("Orden de Compra #{id}".format(id =  1234), 'plain'))
+        message.attach(MIMEText("Orden de Compra #{id}".format(id =  po_id), 'plain'))
         # create server
         server = smtplib.SMTP('smtp.gmail.com: 587')
         
@@ -27,7 +26,7 @@ def sendPurchaseOrder():
         
         # send the message via the server.
 
-        attach_file_name = 'purchase_order.pdf'
+        attach_file_name = 'ORD_nro_{id}.pdf'.format(id = po_id)
         attach_file = open(attach_file_name, 'rb') # Open the file as binary mode
         payload = MIMEBase('application', 'octate-stream',name=attach_file_name)
         payload.set_payload((attach_file).read())
@@ -152,5 +151,4 @@ def userRegistered(destinatario,msgA,request):
 
         return json({"ok":"ok"})
     except Exception as error:
-        print(error)
         return json({"data":str(error),"code":500},500)
