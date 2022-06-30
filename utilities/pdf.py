@@ -17,7 +17,8 @@ import shutil
 import os
 # url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
 url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
-url_reports = '/home/carlos/Desktop/tg/reports/'
+# url_reports = '/home/carlos/Desktop/tg/reports/'
+url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
 
 async def pdfPurchaseOrder(request,data):
     try:
