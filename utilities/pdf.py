@@ -104,7 +104,6 @@ async def pdfPurchaseOrder(request,data):
         Story.append(Paragraph('<strong>Moneda de pago: </strong>{currency}'.format(currency= currency[1]),estiloN))
 
         Story.append(Spacer(1, 20))
-        Story.append(Paragraph('<strong>Firma de receptor: ___________________</strong> ',estilosfirma))  
         doc.build(Story)
         sendPurchaseOrder(supplier[5],request["nro_order"])
 

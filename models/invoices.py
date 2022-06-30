@@ -144,7 +144,7 @@ async def listInvoices(request):
             cursor["cursor"].execute(query_search)
             invoices = cursor["cursor"].fetchall()
         else:
-            query_search = """SELECT * from invoices where id_user = %s order by id desc"""
+            query_search = """SELECT * from invoices where id_user = %s order by created_at desc"""
             cursor["cursor"].execute(query_search,(request['id_user'],))
             invoices = cursor["cursor"].fetchall()   
         
@@ -178,7 +178,8 @@ async def listInvoices(request):
                     "date":x[6],
                     "products":details,
                     "supplier_email":supplier_email[0],
-                    "path": x[12]
+                    "path": x[12],
+                    "id_purchase_order":x[4]
                 }
                 invoicesArr.append(invoicesJson)
                 details = []
