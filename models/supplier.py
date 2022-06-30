@@ -60,7 +60,7 @@ async def updateSupplier(request):
             records_history = ('Actualizo al Proveedor '+request["name"],request["user_created"],datetime.now(),)
             cursor["cursor"].execute(query_history,records_history)
             cursor["conn"].commit()
-            return json({"data":"Usuario modificado con éxito","code":200},200)
+            return json({"data":"Proveedor modificado con éxito","code":200},200)
         else:
             return valid
     except (Exception, psycopg2.Error) as error:
