@@ -17,11 +17,25 @@ async def addPurchaseOrder(request,data):
                 query_noti = """INSERT INTO purchase_order (date,completed,deleted,id_supplier,terms_conditions,delivery_address,id_currency,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (datetime.strptime(request["date"],"%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),False,False,request["supplier"],request["terms_conditions"],request["delivery_address"],request["currency"],'',)
                 cursor["cursor"].execute(query_noti,records)
+
+                await addPurchaseOrderDetail(request,data)
+
+                query_search = """SELECT name from supplier WHERE id = %s"""
+                cursor["cursor"].execute(query_search,(request["supplier"],))
+                supplier = cursor["cursor"].fetchone()
+
+                query_search = """SELECT id from users WHERE first_name = %s"""
+                cursor["cursor"].execute(query_search,(supplier[0],))
+                user = cursor["cursor"].fetchone()
+
+                query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+                records_history = ('Se le asigno una Nueva Orden de Compra',user[0],datetime.now(),)
+                cursor["cursor"].execute(query_history,records_history)
+
                 query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
                 records_history = ('Generó una Nueva Orden de Compra',request["user_created"],datetime.now(),)
                 cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
-                await addPurchaseOrderDetail(request,data)
                 return json({"data":"Orden de compra creada","code":200,"pdf":1},200)
             else:
                 return await pdfPurchaseOrder(request,data)
@@ -120,7 +134,7 @@ async def updatePurchaseOrder(request,data):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def listPurchaseOrder(request):
+async def listPurchaseOrder(request,data):
     try:
         cursor = connectPSQL()
         purchaseOrdersArr = []
@@ -128,6 +142,20 @@ async def listPurchaseOrder(request):
             query_search = """SELECT * from purchase_order order by id desc"""
             cursor["cursor"].execute(query_search)
             purchaseOrders = cursor["cursor"].fetchall()
+
+        elif request['role'] == 10:
+            query_search = """SELECT firts_name from users WHERE id = %s"""
+            cursor["cursor"].execute(query_search,(data,))
+            user = cursor["cursor"].fetchone()
+            if user:
+                query_search = """SELECT id from supplier WHERE name = %s"""
+                cursor["cursor"].execute(query_search,(user[0],))
+                supplier = cursor["cursor"].fetchone()
+
+                if supplier:
+                    query_search = """SELECT * from purchase_order WHERE id_supplier = %s order by id desc"""
+                    cursor["cursor"].execute(query_search,(supplier[0],))
+                    purchaseOrders = cursor["cursor"].fetchall()
         else:
             query_search = """SELECT * from purchase_order where id_user = %s order by id desc"""
             cursor["cursor"].execute(query_search,(request['id_user'],))
@@ -151,6 +179,7 @@ async def listPurchaseOrder(request):
                     uservalue = user[4]+ " "+user[5]
                 else:
                     uservalue = "Sin Asignar"
+                
                 purchaseOrdersJson = {
                     "nro_order":x[0],
                     "date":x[9],

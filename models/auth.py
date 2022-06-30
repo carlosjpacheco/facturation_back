@@ -152,8 +152,9 @@ async def readUser(request):
         user = cursor["cursor"].fetchone()
         if user:
             query_search = """SELECT * from role WHERE id = %s"""
-            cursor["cursor"].execute(query_search,(str(user[6])))
+            cursor["cursor"].execute(query_search,(str(user[6]),))
             rol = cursor["cursor"].fetchone()
+            print(rol)
             return json({"data":{"user":{
                 "id":user[0],
                 "username": user[1],
@@ -178,7 +179,7 @@ async def listUsers():
         users = cursor["cursor"].fetchall()
         for x in users:
             query_search = """SELECT * from role WHERE id = %s"""
-            cursor["cursor"].execute(query_search,(str(x[6])))
+            cursor["cursor"].execute(query_search,(str(x[6]),))
             rol = cursor["cursor"].fetchone()
             usersJson = {
                 "id":x[0],

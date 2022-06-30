@@ -22,6 +22,14 @@ async def addInvoice(request,data):
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],)
                 cursor["cursor"].execute(query_noti,records)
+                
+                query_search = """SELECT id from users WHERE first_name = %s"""
+                cursor["cursor"].execute(query_search,(request["supplier"],))
+                user = cursor["cursor"].fetchone()
+
+                query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
+                records_history = ('Se le asigno una factura a la Orden de Compra #'+request["id_purchase_order"],user[0],datetime.now(),)
+                cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
                 addInvoiceDetail(request)
                 shutil.move("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/"+request["path"],"C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices")
@@ -134,7 +142,7 @@ async def updateInvoiceDetail(request):
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
-async def listInvoices(request):
+async def listInvoices(request,data):
     try:
         cursor = connectPSQL()
         invoicesArr = []
@@ -143,6 +151,15 @@ async def listInvoices(request):
             query_search = """SELECT * from invoices"""
             cursor["cursor"].execute(query_search)
             invoices = cursor["cursor"].fetchall()
+
+        elif request['role'] == 10:
+            query_search = """SELECT firts_name from users WHERE id = %s"""
+            cursor["cursor"].execute(query_search,(data,))
+            user = cursor["cursor"].fetchone()
+            if user:
+                query_search = """SELECT * from invoices where name_supplier = %s"""
+                cursor["cursor"].execute(query_search,(user[0],))
+                invoices = cursor["cursor"].fetchall()
         else:
             query_search = """SELECT * from invoices where id_user = %s order by id desc"""
             cursor["cursor"].execute(query_search,(request['id_user'],))

@@ -107,13 +107,13 @@ async def pdfPurchaseOrder(request,data):
         Story.append(Spacer(1, 20))
         Story.append(Paragraph('<strong>Firma de receptor: ___________________</strong> ',estilosfirma))  
         doc.build(Story)
-        sendPurchaseOrder(supplier[5],request["nro_order"])
 
         # sendPurchaseOrder()  
         if request["preview"]==True:  
             shutil.move("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]),url_to_move)
             return await showPDF("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]))
         else:
+            sendPurchaseOrder(supplier[5],request["nro_order"])
             shutil.move("ORD_nro_{name}.pdf".format(name=request["nro_order"]),url_to_move)
             return await showPDF("ORD_nro_{name}.pdf".format(name=request["nro_order"]))
         

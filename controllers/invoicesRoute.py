@@ -53,7 +53,7 @@ def ping(request: Request, token : Token):
 @inv.route('/list', methods=['POST'])
 @jwt_required
 def ping(request: Request, token : Token):
-    return invoices.listInvoices(request.json)
+    return invoices.listInvoices(request.json,token.identity)
 
 @inv.route('/listRobot', methods=['GET'])
 @jwt_required
