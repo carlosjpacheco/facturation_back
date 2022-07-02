@@ -58,7 +58,9 @@ async def sendPayment(request,data):
     })
 
     if payout.create(sync_mode=False):
+        print(payout)
         await payInvoice({'id':request['id']},data)
         return json({"data":'Pago creado','code':200},200)
     else:
-        return json({"error":str(payout.error),"code":500},500)
+        print(payout.error)
+        return json({"error":'Error',"code":500},500)

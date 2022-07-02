@@ -17,8 +17,8 @@ import shutil
 import os
 # url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
 url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
-# url_reports = '/home/carlos/Desktop/tg/reports/'
-url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
+url_reports = '/home/carlos/Desktop/tg/reports/'
+# url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
 
 async def pdfPurchaseOrder(request,data):
     try:
@@ -141,7 +141,7 @@ async def pdfReport(request):
                     user = user[0]+ ' '+ user[2]
                 else:
                     user = user[0]+ ' '+ user[1]
-                row = [x['nro_invoice'],x['total'],x['user'],x['supplier'],x['status'],str(datetime.fromtimestamp(x['date']))[:10]]
+                row = [x['nro_invoice'],str(x['total'])+'$',user,x['supplier'],x['status'],str(datetime.fromtimestamp(x['date']))[:10]]
                 answers3.append(row)
         else:
             answers3.append(['Ref','Encargado','Proveedor','Moneda','Estado','Fecha',])
