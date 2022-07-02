@@ -191,6 +191,7 @@ async def listPurchaseOrder(request,data):
                 cursor["cursor"].execute(query_search3,(x[0],))
                 con_factura = cursor["cursor"].fetchone()
                 factura = True if con_factura else False
+                path_factura = con_factura[12] if factura else " "
                 if x[1] != None:
                     query_search3 = """SELECT * from users where id = %s"""
                     cursor["cursor"].execute(query_search3,(x[1],))
@@ -205,7 +206,8 @@ async def listPurchaseOrder(request,data):
                     "user": uservalue,
                     "supplier":supplier[1],
                     "path": x[8],
-                    "factura": factura
+                    "factura": factura,
+                    "path_factura": path_factura
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
