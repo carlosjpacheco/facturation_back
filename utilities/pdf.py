@@ -15,8 +15,8 @@ from utilities.connections import connectPSQL
 from utilities.sendEmails import sendPurchaseOrder
 import shutil 
 import os
-# url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
-url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
+url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+# url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
 url_reports = '/home/carlos/Desktop/tg/reports/'
 # url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
 
@@ -112,7 +112,7 @@ async def pdfPurchaseOrder(request,data):
             shutil.move("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]),url_to_move)
             return await showPDF("ORD_nro_{name}_{supplier}_preview.pdf".format(name=data,supplier=supplier[0]))
         else:
-            sendPurchaseOrder(supplier[5],request["nro_order"])
+            sendPurchaseOrder(supplier[8],request["nro_order"])
             shutil.move("ORD_nro_{name}.pdf".format(name=request["nro_order"]),url_to_move)
             return await showPDF("ORD_nro_{name}.pdf".format(name=request["nro_order"]))
         
