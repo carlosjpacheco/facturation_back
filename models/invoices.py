@@ -293,3 +293,37 @@ async def deleteRobotInvoicePDF(request):
         return json({"data":"PDF Eliminado","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
+
+async def selectItems():
+    try:
+        itemsArr = []
+        cursor: connectPSQL()
+        query = """SELECT * FROM invoice_items"""
+        cursor['cursor'].execute(query)
+        items = cursor['cursor'].fetchall()
+        for x in items:
+            json = {
+                "id":x[0],
+                'item':x[1],
+                'status':x[2]
+            }
+            itemsArr.append(json)
+        return json({"data":itemsArr,'code':200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def disableOrenableItem(request):
+    try:
+        cursor = connectPSQL()
+        if request["status"] == True:
+            status = False
+            sql_delete_query = """Update invoice_items set status=%s where id = %s"""
+            cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
+        else:
+            status = True
+        sql_delete_query = """Update invoice_items set status=%s where id = %s"""
+        cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
+        cursor["conn"].commit()
+        return json({"data":"Usuario eliminado","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
