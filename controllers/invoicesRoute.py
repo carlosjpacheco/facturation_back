@@ -64,3 +64,13 @@ def ping(request: Request, token : Token):
 @jwt_required
 def ping(request: Request, token : Token):
     return invoices.uploadFile(request)
+
+@inv.route('/listItems', methods=['GET'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.selectItems()
+
+@inv.route('/disableItem', methods=['POST'])
+@jwt_required
+def ping(request: Request, token : Token):
+    return invoices.disableOrenableItem(request.json)
