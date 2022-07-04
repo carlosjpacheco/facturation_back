@@ -297,17 +297,17 @@ async def deleteRobotInvoicePDF(request):
 async def selectItems():
     try:
         itemsArr = []
-        cursor: connectPSQL()
-        query = """SELECT * FROM invoice_items"""
+        cursor= connectPSQL()
+        query = """SELECT id, item, status FROM invoice_items order by status desc"""
         cursor['cursor'].execute(query)
         items = cursor['cursor'].fetchall()
         for x in items:
-            json = {
+            jsonItem = {
                 "id":x[0],
                 'item':x[1],
                 'status':x[2]
             }
-            itemsArr.append(json)
+            itemsArr.append(jsonItem)
         return json({"data":itemsArr,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
