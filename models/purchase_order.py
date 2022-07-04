@@ -7,7 +7,7 @@ from sanic.response import json
 from utilities.validators import validPurchaseOrder
 from utilities.pdf import pdfPurchaseOrder
 from models.notifications import addNotification
-from utilities.sendEmails import sendPurchaseOrder
+
 async def addPurchaseOrder(request,data):
     try:
         valid = await validPurchaseOrder(request)
@@ -19,17 +19,25 @@ async def addPurchaseOrder(request,data):
                 cursor["cursor"].execute(query_noti,records)
 
                 await addPurchaseOrderDetail(request,data)
-
+                                        
                 query_search = """SELECT name from supplier WHERE id = %s"""
                 cursor["cursor"].execute(query_search,(request["supplier"],))
                 supplier = cursor["cursor"].fetchone()
 
-                query_search = """SELECT id from users WHERE first_name = %s"""
+                query_search = """SELECT * from users WHERE first_name = %s"""
                 cursor["cursor"].execute(query_search,(supplier[0],))
-                user = cursor["cursor"].fetchone()
+                user_sup = cursor["cursor"].fetchone()
+
+                await addNotification({"destination":user_sup[0],
+                                        "source":data,
+                                        "description":"Te han han enviado una orden de compra, revisa tu correo"})
+
+                # query_search = """SELECT id from users WHERE id = %s"""
+                # cursor["cursor"].execute(query_search,(data,))
+                # user = cursor["cursor"].fetchone()
 
                 query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
-                records_history = ('Se le asigno una Nueva Orden de Compra',user[0],datetime.now(),)
+                records_history = ('Se le asigno una Nueva Orden de Compra',user_sup[0],datetime.now(),)
                 cursor["cursor"].execute(query_history,records_history)
 
                 query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
@@ -151,7 +159,7 @@ async def listPurchaseOrder(request,data):
                 cursor["cursor"].execute(query_search)
                 purchaseOrders = cursor["cursor"].fetchall()
             elif request['role'] == 10:
-                query_search = """SELECT firts_name from users WHERE id = %s"""
+                query_search = """SELECT first_name from users WHERE id = %s"""
                 cursor["cursor"].execute(query_search,(data,))
                 user = cursor["cursor"].fetchone()
                 if user:
@@ -170,7 +178,6 @@ async def listPurchaseOrder(request,data):
         else:
             start_date = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
             end_date = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
-            print(start_date)
             if request['role'] == 1 or request['role'] == 2:
                 query_search = """SELECT * from purchase_order where date>= %s and date <=%s order by id desc"""
                 cursor["cursor"].execute(query_search,(start_date.timestamp(),end_date.timestamp()))

@@ -26,12 +26,23 @@ async def payInvoice(request,data):
         query="""SELECT * FROM users WHERE id=%s"""
         cursor['cursor'].execute(query,(data,))
         user = cursor['cursor'].fetchone()
+
+
+        query="""SELECT * FROM suppliers WHERE email=%s"""
+        cursor['cursor'].execute(query,(request['receiver'],))
+        supplier = cursor['cursor'].fetchone()
         for x in users:
             await addNotification({
                 'destination':x,
                 'source':data,
                 'description':"Factura #{id} asignada a {user} ha sido pagada".format(id=request['id'],user=user[4]+ ' ' + user[5])
             })
+        await addNotification({
+                'destination':supplier[0],
+                'source':data,
+                'description':"Factura #{id} asignada a {user} ha sido pagada".format(id=request['id'],user=user[4]+ ' ' + user[5])
+            })
+        
         cursor["conn"].commit()
         return json({"data":"Factura #{id} ha sido pagada con éxito".format(id=request['id']),'code':200},200)
     except (Exception,psycopg2.Error) as error:

@@ -153,12 +153,13 @@ async def listInvoices(request,data):
                 cursor["cursor"].execute(query_search)
                 invoices = cursor["cursor"].fetchall()
             elif request['role'] == 10:
-                query_search = """SELECT firts_name from users WHERE id = %s"""
+                query_search = """SELECT first_name from users WHERE id = %s"""
                 cursor["cursor"].execute(query_search,(data,))
                 user = cursor["cursor"].fetchone()
                 if user:
                     query_search = """SELECT * from invoices where name_supplier = %s"""
                     cursor["cursor"].execute(query_search,(user[0],))
+                    invoices = cursor["cursor"].fetchall()
             else:
                 query_search = """SELECT * from invoices where id_user = %s order by created_at desc"""
                 cursor["cursor"].execute(query_search,(request['id_user'],))
