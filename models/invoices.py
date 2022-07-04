@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from subprocess import CREATE_NEW_CONSOLE
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -19,8 +20,8 @@ async def addInvoice(request,data):
             if invoice:
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
-                query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],)
+                query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path,shipping_address,tax,payment_terms,currency,shipping_charges) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
                 cursor["cursor"].execute(query_noti,records)
                 
                 query_search = """SELECT id from users WHERE first_name = %s"""
@@ -254,6 +255,11 @@ async def listInvoicesRobot():
                     "total":x[2],
                     "supplier": x[4],
                     "date":x[3],
+                    "shipping_address":x[6],
+                    "tax":x[7],
+                    "payment_terms":x[8],
+                    "currency":x[9],
+                    "shipping_charges":x[10],                    
                     "products":details,
                     "path": path[1]
                 }
@@ -297,17 +303,17 @@ async def deleteRobotInvoicePDF(request):
 async def selectItems():
     try:
         itemsArr = []
-        cursor: connectPSQL()
+        cursor= connectPSQL()
         query = """SELECT * FROM invoice_items"""
         cursor['cursor'].execute(query)
         items = cursor['cursor'].fetchall()
         for x in items:
-            json = {
+            jsonItem = {
                 "id":x[0],
                 'item':x[1],
                 'status':x[2]
             }
-            itemsArr.append(json)
+            itemsArr.append(jsonItem)
         return json({"data":itemsArr,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -324,6 +330,6 @@ async def disableOrenableItem(request):
         sql_delete_query = """Update invoice_items set status=%s where id = %s"""
         cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
         cursor["conn"].commit()
-        return json({"data":"Usuario eliminado","code":200},200)
+        return json({"data":"Item Modificado","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
