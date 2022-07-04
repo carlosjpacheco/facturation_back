@@ -304,7 +304,7 @@ async def selectItems():
     try:
         itemsArr = []
         cursor= connectPSQL()
-        query = """SELECT * FROM invoice_items"""
+        query = """SELECT id, item, status FROM invoice_items order by status desc"""
         cursor['cursor'].execute(query)
         items = cursor['cursor'].fetchall()
         for x in items:
