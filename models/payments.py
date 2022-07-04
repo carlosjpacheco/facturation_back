@@ -49,29 +49,28 @@ async def payInvoice(request,data):
         return json({'error':str(error), 'code':500},500)
 
 async def sendPayment(request,data):
-    payout = Payout({
-    "sender_batch_header": {
-        "sender_batch_id": str(uuid4()),
-        "email_subject": request['subject']
-    },
-    "items": [
-        {
-            "recipient_type": "EMAIL",
-            "amount": {
-                "value": request["value"],
-                "currency": "USD"
-            },
-            "receiver": request["receiver"],
-            "note": request["subject"],
-            "sender_item_id": "item_1"
-        }
-        ]
-    })
-
-    if payout.create(sync_mode=False):
-        print(payout)
-        await payInvoice({'id':request['id']},data)
-        return json({"data":'Pago creado','code':200},200)
-    else:
-        print(payout.error)
-        return json({"error":'Error',"code":500},500)
+    try:
+        payout = Payout({
+        "sender_batch_header": {
+            "sender_batch_id": str(uuid4()),
+            "email_subject": request['subject']
+        },
+        "items": [
+            {
+                "recipient_type": "EMAIL",
+                "amount": {
+                    "value": request["value"],
+                    "currency": "USD"
+                },
+                "receiver": request["receiver"],
+                "note": request["subject"],
+                "sender_item_id": "item_1"
+            }
+            ]
+        })  
+        
+        if payout.create(sync_mode=False):
+            await payInvoice({'id':request['id']},data)
+            return json({"data":'Pago creado','code':200},200)
+    except Exception as error:
+        return json({"error":'Hubo un inconveniente procesando su pago, revise el balance de la cuenta y el destinatario',"code":500},500)
