@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-from subprocess import CREATE_NEW_CONSOLE
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2

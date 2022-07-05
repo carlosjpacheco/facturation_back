@@ -35,11 +35,10 @@ app.config.REQUEST_TIMEOUT = 4000
 
 
 paypalrestsdk.configure({
-    'client_id': 'Ad3vpos-It-NDWk_-8zM60Tqyq7VbY5KM0y1NACQKr5u769yOPzZ-pCuzKXlKjyChKzVjIraWGpDmHn5',
-    'client_secret': 'EBKSS0V5aPL-ElS5TO27tOZV5hDa6u5e8vr_yryuFz9bv7HbbneRNcxPqiE7Ch3Zp-ygflPOjfIm5mp_',
-    'mode':'sandbox',
-    'sync_mode':False
-})
+    'client_id': 'AVpLfV5K-YSdXohucZ3pEHaHuownRfmnMfraPtAzSOyDPpgX502_4W89rS7LpBUS8XQX7a4NWr9B73Kq',
+    'client_secret': 'EN1l4VTesIZwSYt-tuigEJeI-f7YodEL5d4d45Z85NA9S9vRDFuM95L1GkfG9qhq62QfWG627r_YlSc0',
+    'mode':'sandbox'
+    })
 
 
 with JWT.initialize(app) as manager:
