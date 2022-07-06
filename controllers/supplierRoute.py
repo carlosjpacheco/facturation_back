@@ -32,6 +32,11 @@ async def ping(request: Request, token : Token):
 async def ping(request: Request, token : Token):
     return supplier.listSuppliers()
 
+@s.route('/listActive', methods=['GET'])
+@jwt_required
+async def ping(request: Request, token : Token):
+    return supplier.listActiveSuppliers()
+
 @s.route('/read', methods=['POST'])
 @jwt_required
 async def ping(request: Request, token:Token):

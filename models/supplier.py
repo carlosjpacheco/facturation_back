@@ -116,6 +116,27 @@ def listSuppliers():
     except (Exception,psycopg2.Error) as error:
         return json({"error":error,"code":500},500)
 
+def listActiveSuppliers():
+    try:
+        
+        supplierArr = []
+        cursor = connectPSQL()
+        query_search = """SELECT * from supplier where status = true"""
+        cursor["cursor"].execute(query_search)
+        supplier = cursor["cursor"].fetchall()
+        for x in supplier:
+            supplierJson = {
+                "id": x[0],
+                "rif": x[2],
+                "name": x[1],
+                "email":x[5],
+                "status":x[10],
+            }
+            supplierArr.append(supplierJson)
+        return json({"data":supplierArr,"code":200},200)
+    except (Exception,psycopg2.Error) as error:
+        return json({"error":error,"code":500},500)
+
 def readSupplier(request):
     try:
         cursor = connectPSQL()
