@@ -27,11 +27,23 @@ async def addInvoice(request,data):
                 cursor["cursor"].execute(query_search,(request["supplier"],))
                 user = cursor["cursor"].fetchone()
 
+                query_search = """SELECT id from users WHERE id_role = 3 or first_name = %s"""
+                cursor["cursor"].execute(query_search,(request['supplier'],))
+                destination = cursor["cursor"].fetchall()
+                    
+
                 query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
                 records_history = ('Se le asigno una factura a la Orden de Compra #'+request["id_purchase_order"],user[0],datetime.now(),)
                 cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
                 addInvoiceDetail(request)
+                for x in destination:
+                    if x != data:
+                        addNotification({
+                            'destination':x,
+                            'source':data,
+                            'description':'Se proceso la factura número {id}'.format(id=request['nro_invoice'])
+                        })
                 shutil.move("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/"+request["path"],"C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices")
                 return json({"data":"Factura creada","code":200},200)
         else:
@@ -303,7 +315,7 @@ async def selectItems():
     try:
         itemsArr = []
         cursor= connectPSQL()
-        query = """SELECT id, item, status FROM invoice_items order by status desc"""
+        query = """SELECT id, item, status FROM invoice_items order by item desc"""
         cursor['cursor'].execute(query)
         items = cursor['cursor'].fetchall()
         for x in items:
