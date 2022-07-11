@@ -40,6 +40,12 @@ def login(request):
         request['psw'] = base64.b64encode(request['psw']).decode()
         # dec = base64.b64decode(request['psw']).decode()
 
+        sql_select_query = """SELECT * FROM users WHERE username = %s"""
+        cursor["cursor"].execute(sql_select_query, (request["username"],))
+        userExist = cursor["cursor"].fetchone()
+
+        if not userExist:
+            return json({"error":'Nombre de usuario no existe',"code":500},500)
         sql_select_query = """SELECT * FROM users WHERE username = %s AND psw = %s"""
         cursor["cursor"].execute(sql_select_query, (request["username"],str(request["psw"]),))
         user = cursor["cursor"].fetchone()
