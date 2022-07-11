@@ -9,7 +9,6 @@ import random
 
 async def payInvoice(request,data):
     try:
-        print("hola")
         cursor = connectPSQL()
         date = datetime.now().timestamp()
         query = """

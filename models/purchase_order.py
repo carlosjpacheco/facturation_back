@@ -73,6 +73,7 @@ async def readPurchaseOrder(request):
             query_search2 = """SELECT * from detail_purchase_order WHERE id_purchase_order = %s"""
             cursor["cursor"].execute(query_search2,(request["id"],))
             detailPurchaseOrder = cursor["cursor"].fetchone()
+            print(detailPurchaseOrder)
             query = """SELECT * from supplier WHERE id = %s"""
             cursor["cursor"].execute(query,(purchaseOrder[4],))
             supp = cursor["cursor"].fetchone()
@@ -83,11 +84,13 @@ async def readPurchaseOrder(request):
                     "amount":x[2]
                 }
                 product.append(products)
+            print(purchaseOrder)
             return json({"data":{
-                "nro_order":purchaseOrder[1],
+                "nro_order":purchaseOrder[0],
                 "created_at":detailPurchaseOrder[3],
                 "completed":purchaseOrder[2],
                 "supplier":supp[1],
+                "user":purchaseOrder[1],
                 "email":supp[5],
                 "products":product
             },"code":200},200)    
@@ -199,6 +202,7 @@ async def listPurchaseOrder(request,data):
                 con_factura = cursor["cursor"].fetchone()
                 factura = True if con_factura else False
                 path_factura = con_factura[12] if factura else " "
+                status_factura = con_factura[3] if factura else 0
                 if x[1] != None:
                     query_search3 = """SELECT * from users where id = %s"""
                     cursor["cursor"].execute(query_search3,(x[1],))
@@ -214,7 +218,8 @@ async def listPurchaseOrder(request,data):
                     "supplier":supplier[1],
                     "path": x[8],
                     "factura": factura,
-                    "path_factura": path_factura
+                    "path_factura": path_factura,
+                    "status_factura": status_factura
                 } 
                 purchaseOrdersArr.append(purchaseOrdersJson)
             return json({"data":{"purchaseOrders":purchaseOrdersArr,"code":200}},200)
