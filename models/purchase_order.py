@@ -139,10 +139,11 @@ async def updatePurchaseOrder(request,data):
             WHERE id = %s"""
         records = (request["id_user"],request["id_order"],)
         cursor["cursor"].execute(query,records)
-        await addNotification({
-            "destination":request['id_user'],
-            "source":data,
-            "description":"Te han asignado la orden de compra #{id}".format(id=request["id_order"])})
+        if (data != request['id_user']):
+            await addNotification({
+                "destination":request['id_user'],
+                "source":data,
+                "description":"Te han asignado la orden de compra #{id}".format(id=request["id_order"])})
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:

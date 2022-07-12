@@ -116,10 +116,11 @@ async def updateInvoiceUser(request,data):
             WHERE id = %s"""
         records = (request["id_user"],request["id_invoice"],)
         cursor["cursor"].execute(query,records)
-        await addNotification({
-            "destination":request['id_user'],
-            "source":data,
-            "description":"Te han asignado la factura #{id}".format(id=request["id_invoice"])})
+        if data != request['id_user']:
+            await addNotification({
+                "destination":request['id_user'],
+                "source":data,
+                "description":"Te han asignado la factura #{id}".format(id=request["id_invoice"])})
         cursor["conn"].commit()
         return json({"data":"Usuario asignado con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
