@@ -20,7 +20,7 @@ async def addInvoice(request,data):
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path,shipping_address,tax,payment_terms,currency,shipping_charges) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
+                records = (request["nro_invoice"],request["user"],float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
                 cursor["cursor"].execute(query_noti,records)
                 
                 # query_search = """SELECT id from users WHERE first_name = %s"""
@@ -64,7 +64,7 @@ async def delInvoice(request):
         sql_delete_query1 = """DELETE FROM invoice_detail where id_invoice = %s"""
         cursor["cursor"].execute(sql_delete_query1, (invoice[0],))
 
-        sql_delete_query2 = """DELETE FROM invoice where id = %s"""
+        sql_delete_query2 = """DELETE FROM invoices where id = %s"""
         cursor["cursor"].execute(sql_delete_query2, (invoice[0],))
 
         cursor["conn"].commit()
@@ -364,7 +364,7 @@ async def rejectInvoice(request,data):
         query = """
             UPDATE invoices set 
                 id_status = 2
-                WHERE id = %s"""
+                WHERE nro_invoice = %s"""
         records = (request["id"],)
         cursor["cursor"].execute(query,records)
 
