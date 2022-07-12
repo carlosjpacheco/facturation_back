@@ -45,8 +45,8 @@ async def pdfPurchaseOrder(request,data):
             products_list = []
             for val in request["products"]:
                 list_val = []
-                list_val.append(val["name"])
-                list_val.append(val["description"])
+                list_val.append(val["name"].capitalize())
+                list_val.append(val["description"].capitalize())
                 list_val.append(val["quantity"])
                 products_list.append(list_val)
             request["products"]= products_list

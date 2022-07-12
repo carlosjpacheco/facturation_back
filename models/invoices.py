@@ -20,22 +20,24 @@ async def addInvoice(request,data):
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path,shipping_address,tax,payment_terms,currency,shipping_charges) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-                records = (request["nro_invoice"],None,float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
+                records = (request["nro_invoice"],request["user"],float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
                 cursor["cursor"].execute(query_noti,records)
                 
-                query_search = """SELECT id from users WHERE first_name = %s"""
-                cursor["cursor"].execute(query_search,(request["supplier"],))
-                user = cursor["cursor"].fetchone()
+                # query_search = """SELECT id from users WHERE first_name = %s"""
+                # cursor["cursor"].execute(query_search,(request["supplier"],))
+                # user = cursor["cursor"].fetchone()
 
-                query_search = """SELECT id from users WHERE id_role = 3 or first_name = %s"""
+
+                query_search = """SELECT id from users WHERE id_role = 2 or first_name = %s"""
                 cursor["cursor"].execute(query_search,(request['supplier'],))
                 destination = cursor["cursor"].fetchall()
-                    
+                
 
                 query_history = """INSERT INTO operation_history (description, id_user, date) VALUES (%s,%s,%s)"""
-                records_history = ('Se le asigno una factura a la Orden de Compra #'+request["id_purchase_order"],user[0],datetime.now(),)
+                records_history = ('Se le asigno una factura a la Orden de Compra #'+request["id_purchase_order"],data,datetime.now(),)
                 cursor["cursor"].execute(query_history,records_history)
                 cursor["conn"].commit()
+
                 addInvoiceDetail(request)
                 for x in destination:
                     if x != data:
@@ -54,9 +56,19 @@ async def addInvoice(request,data):
 async def delInvoice(request):
     try:
         cursor = connectPSQL()
-        sql_delete_query = """Update invoices set deleted=true where id = %s"""
+
+        sql_delete_query = """SELECT id,path FROM invoices where id_purchase_order = %s"""
         cursor["cursor"].execute(sql_delete_query, (request["id"],))
+        invoice = cursor["cursor"].fetchone()
+
+        sql_delete_query1 = """DELETE FROM invoice_detail where id_invoice = %s"""
+        cursor["cursor"].execute(sql_delete_query1, (invoice[0],))
+
+        sql_delete_query2 = """DELETE FROM invoices where id = %s"""
+        cursor["cursor"].execute(sql_delete_query2, (invoice[0],))
+
         cursor["conn"].commit()
+        os.remove("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices/"+invoice[1])
         return json({"data":"Factura eliminada","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -316,7 +328,7 @@ async def selectItems():
     try:
         itemsArr = []
         cursor= connectPSQL()
-        query = """SELECT id, item, status FROM invoice_items order by item desc"""
+        query = """SELECT id, item, status FROM invoice_items order by id asc"""
         cursor['cursor'].execute(query)
         items = cursor['cursor'].fetchall()
         for x in items:
@@ -343,5 +355,34 @@ async def disableOrenableItem(request):
         cursor["cursor"].execute(sql_delete_query, (status,request["id"]))
         cursor["conn"].commit()
         return json({"data":"Item Modificado","code":200},200)
+    except (Exception, psycopg2.Error) as error:
+        return json({"error":str(error),"code":500},500)
+
+async def rejectInvoice(request,data):
+    try:
+        cursor = connectPSQL()
+        
+        query = """
+            UPDATE invoices set 
+                id_status = 2
+                WHERE nro_invoice = %s"""
+        records = (request["id"],)
+        cursor["cursor"].execute(query,records)
+
+        if request["user"] == None:
+        
+            query_search = """SELECT id from users WHERE first_name = %s"""
+            cursor["cursor"].execute(query_search,(request["supplier"],))
+            user = cursor["cursor"].fetchone()
+            process_user = user[0]
+        else:
+            process_user = request["user"]
+        
+        await addNotification({
+            "destination":process_user,
+            "source":data,
+            "description":"Se ha rechazado la factura #{id}".format(id=request["id"])})
+        cursor["conn"].commit()
+        return json({"data":"Factura rechazada con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
