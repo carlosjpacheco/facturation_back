@@ -81,7 +81,7 @@ async def readPurchaseOrder(request):
             for x in detailPurchaseOrder[2]:
                 products = {
                     "product":x[0][1:-1],
-                    "description":x[1],
+                    "description":x[1][1:-1],
                     "amount":x[2]
                 }
                 product.append(products)
