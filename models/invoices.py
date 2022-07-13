@@ -19,6 +19,8 @@ async def addInvoice(request,data):
             if invoice:
                 return json({"error":"La Factura ya fue procesada","code":500},500)        
             else:
+                if request["user"] == "null":
+                    request["user"] = None
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path,shipping_address,tax,payment_terms,currency,shipping_charges) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (request["nro_invoice"],request["user"],float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
                 cursor["cursor"].execute(query_noti,records)
