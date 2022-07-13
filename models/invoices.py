@@ -247,15 +247,19 @@ async def listInvoices(request,data):
 async def uploadFile(request):
     try:
         file = request.files.get("file")
-        completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
-        completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", file.name)
-        file1 = open(completeName, "wb")
-        file1.write(file.body)
-        file1.close()
-        file2 = open(completeName1, "wb")
-        file2.write(file.body)
-        file2.close()
-        return json({"data":"Exito","path":file.name,"code":200},200)
+        exist = os.path.exists("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices/"+ file.name)
+        if exist:
+            return json({"error":"La Factura ya fue procesada","code":500},500)
+        else:
+            completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
+            completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", file.name)
+            file1 = open(completeName, "wb")
+            file1.write(file.body)
+            file1.close()
+            file2 = open(completeName1, "wb")
+            file2.write(file.body)
+            file2.close()
+            return json({"data":"Exito","path":file.name,"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
