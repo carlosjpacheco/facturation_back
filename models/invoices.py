@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from facturation_back.utilities.sendEmails import rejectInvoiceMail
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -384,11 +385,16 @@ async def rejectInvoice(request,data):
         else:
             process_user = request["user"]
         
+        query_search = """SELECT contact_email FROM supplier WHERE name = %s"""
+        cursor["cursor"].execute(query_search,(request["supplier"],))
+        supplier = cursor["cursor"].fetchone()
+        
         await addNotification({
             "destination":process_user,
             "source":data,
             "description":"Se ha rechazado la factura #{id}".format(id=request["id"])})
         cursor["conn"].commit()
+        rejectInvoiceMail(supplier[0],'Factura Rechazada',{'nro_invoice':request["id"]})
         return json({"data":"Factura rechazada con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
