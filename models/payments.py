@@ -40,7 +40,7 @@ async def payInvoice(request,data):
         await addNotification({
                 'destination':supplier[0],
                 'source':data,
-                'description':"Factura #{id} asignada a {user} ha sido pagada".format(id=request['id'],user=user[4]+ ' ' + user[5])
+                'description':"Factura #{id} ha sido pagada".format(id=request['id'])
             })
         
         cursor["conn"].commit()
