@@ -28,17 +28,23 @@ async def payInvoice(request,data):
         user = cursor['cursor'].fetchone()
 
 
-        query="""SELECT * FROM supplier WHERE email=%s"""
+        query="""SELECT name FROM supplier WHERE email=%s"""
         cursor['cursor'].execute(query,(request['receiver'],))
         supplier = cursor['cursor'].fetchone()
+
+        query_search = """SELECT id from users WHERE first_name = %s"""
+        cursor["cursor"].execute(query_search,(supplier[0],))
+        user_supplier = cursor["cursor"].fetchone()
+
         for x in users:
             await addNotification({
                 'destination':x,
                 'source':data,
                 'description':"Factura #{id} asignada a {user} ha sido pagada".format(id=request['id'],user=user[4]+ ' ' + user[5])
             })
+            
         await addNotification({
-                'destination':supplier[0],
+                'destination':user_supplier[0],
                 'source':data,
                 'description':"Factura #{id} ha sido pagada".format(id=request['id'])
             })

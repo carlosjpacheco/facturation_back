@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from facturation_back.utilities.sendEmails import rejectInvoiceMail
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2
@@ -247,15 +248,19 @@ async def listInvoices(request,data):
 async def uploadFile(request):
     try:
         file = request.files.get("file")
-        completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
-        completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", file.name)
-        file1 = open(completeName, "wb")
-        file1.write(file.body)
-        file1.close()
-        file2 = open(completeName1, "wb")
-        file2.write(file.body)
-        file2.close()
-        return json({"data":"Exito","path":file.name,"code":200},200)
+        exist = os.path.exists("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/Invoices/"+ file.name)
+        if exist:
+            return json({"error":"La Factura ya fue procesada","code":500},500)
+        else:
+            completeName = os.path.join("C:/Users/Usuario/Documents/UiPath/Invoices_Extraction/Invoices", file.name)
+            completeName1 = os.path.join("C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets/RobotInvoices/", file.name)
+            file1 = open(completeName, "wb")
+            file1.write(file.body)
+            file1.close()
+            file2 = open(completeName1, "wb")
+            file2.write(file.body)
+            file2.close()
+            return json({"data":"Exito","path":file.name,"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
 
@@ -380,11 +385,16 @@ async def rejectInvoice(request,data):
         else:
             process_user = request["user"]
         
+        query_search = """SELECT contact_email FROM supplier WHERE name = %s"""
+        cursor["cursor"].execute(query_search,(request["supplier"],))
+        supplier = cursor["cursor"].fetchone()
+        
         await addNotification({
             "destination":process_user,
             "source":data,
             "description":"Se ha rechazado la factura #{id}".format(id=request["id"])})
         cursor["conn"].commit()
+        rejectInvoiceMail(supplier[0],'Factura Rechazada',{'nro_invoice':request["id"]})
         return json({"data":"Factura rechazada con éxito","code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

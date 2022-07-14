@@ -78,6 +78,39 @@ def sendPswAdm(destinatario,msgA,request):
     except Exception as error:
         return json({"data":str(error),"code":500},500)
 
+def rejectInvoiceMail(destinatario,msgA,request):
+    try:
+        msg = EmailMessage()
+        password = "bxbgeryvljjkccvg"
+        msg['From'] = 'carlosjpa1305@gmail.com'
+        msg['To'] = destinatario
+        msg['Subject']='LoreBI CA'
+        msg.attach(MIMEText(msgA, 'plain'))
+        msg.set_content('''
+        <!DOCTYPE html>
+        <html>
+            <body style="text-align:center;">
+                <div style="padding:20px 0px;text-align:center;display:flex;">
+                    <div style="height: 500px;width:400px;text-align:center;">
+                        <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
+                            <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Factura Rechazada</h2>
+                        </div>
+                        <img src="https://scontent-bog1-1.xx.fbcdn.net/v/t1.18169-9/13902758_1765973353659765_2515708523114629158_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bwAUI6NqNFYAX-xvVXA&_nc_ht=scontent-bog1-1.xx&oh=00_AT8LW49TtyQO7zTW7ajn7sDhNM4pZOiyymRl4rdCdhBHMQ&oe=62E3DBD1" style="height: 300px;position:absolute;margin-top:0;display:block;margin:auto;">
+                        <div style="background:#3C49BD;">
+                            <h2 style="color:#F8F8FE;">La Factura Nro: {nro_invoice} ha sido rechazada, por favor subirla nuevamente.</h2>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+        '''.format(nro_invoice = request['nro_invoice']), subtype='html')
+      
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(msg['from'], password) 
+            smtp.send_message(msg)
+    except Exception as error:
+        return json({"data":str(error),"code":500},500)
+
 def updatePsw(destinatario,msgA,request):
     try:
         # msg = MIMEMultipart()

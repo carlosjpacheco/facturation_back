@@ -106,7 +106,7 @@ async def addPurchaseOrderDetail(request,data):
         list_val = []
         val['description']= val['description'].replace(',','|')
         list_val.append(val["name"].capitalize())
-        list_val.append(val["description"].capitalize())
+        list_val.append(val["description"])
         list_val.append(val["quantity"])
         products_list.append(list_val)
     request["products"]= products_list
