@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from facturation_back.utilities.sendEmails import rejectInvoiceMail
+from utilities.sendEmails import rejectInvoiceMail
 from models.notifications import addNotification
 from utilities.connections import connectPSQL
 import psycopg2

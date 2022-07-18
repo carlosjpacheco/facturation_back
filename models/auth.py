@@ -10,6 +10,7 @@ from sanic.response import json
 from utilities.validators import validSignup, validUpdateUser
 import random
 from utilities.sendEmails import sendPswAdm,updatePsw, userRegistered
+import json as jsonResponse
 
 async def signup(request):
     try:
@@ -36,9 +37,10 @@ async def signup(request):
 def login(request):
     try:
         cursor = connectPSQL()
+        if cursor ==  False:
+            return json({'error':"Error de conexión a la base de datos","code":501},500)
         request['psw'] = request['psw'].encode("utf-8")
         request['psw'] = base64.b64encode(request['psw']).decode()
-        # dec = base64.b64decode(request['psw']).decode()
 
         sql_select_query = """SELECT * FROM users WHERE username = %s"""
         cursor["cursor"].execute(sql_select_query, (request["username"],))
@@ -90,8 +92,6 @@ def login(request):
                     sql_update_query = """Update users set attemp = %s where username = %s"""
                     cursor["cursor"].execute(sql_update_query, ((user[10]+1),request["username"]))
             cursor["conn"].commit()
-
-
             return json({"error":"Usuario o contraseña incorrecta, al tercer intento se bloqueará","code":500},500)
     except Exception as error:
         return json({"error":str(error),"code":500},500)
