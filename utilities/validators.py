@@ -15,7 +15,7 @@ async def validSignup(request):
         dni_rif_query= """SELECT * FROM users WHERE dni_rif= %s"""
         cursor['cursor'].execute(dni_rif_query,(request['dni_rif'],))
         if cursor["cursor"].fetchone():
-            return json({"error":"Ya existe un usuario con ese Nro. de Cedula","code":500},500)
+            return json({"error":"Ya existe un usuario con ese documento de identidad","code":500},500)
     if "email" in request:
         dni_rif_query= """SELECT * FROM supplier WHERE email= %s"""
         cursor['cursor'].execute(dni_rif_query,(request['email'],))

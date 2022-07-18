@@ -25,7 +25,7 @@ async def assign_user_purchaseOrder_pie():
 
 async def assign_user_purchaseOrder_bar():
     try:
-        today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+        today =datetime.strptime(str(date.today())+"T00:00:00Z","%Y-%m-%dT%H:%M:%SZ")
         days = []
         processed = []
         unProcessed = []
@@ -73,7 +73,7 @@ async def pay_invoice_pie():
 
 async def pay_invoice_bar():
     try:
-        today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+        today =datetime.strptime(str(date.today())+"T00:00:00Z","%Y-%m-%dT%H:%M:%SZ")
         days = []
         processed = []
         unProcessed = []
@@ -108,7 +108,7 @@ async def assign_user_purchaseOrder_line():
         users = cursor['cursor'].fetchall()
         datasets = []
         for x in users:
-            today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+            today =datetime.strptime(str(date.today())+"T00:00:00Z","%Y-%m-%dT%H:%M:%SZ")
             week = today - timedelta(days=6)
             days = []
             amounts = []
@@ -143,7 +143,7 @@ async def assign_user_invoices_line():
         users = cursor['cursor'].fetchall()
         datasets = []
         for x in users:
-            today =datetime.strptime(str(date.today())+"T23:59:59Z","%Y-%m-%dT%H:%M:%SZ")
+            today =datetime.strptime(str(date.today())+"T00:00:00Z","%Y-%m-%dT%H:%M:%SZ")
             week = today - timedelta(days=6)
             days = []
             amounts = []

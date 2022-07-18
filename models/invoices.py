@@ -25,6 +25,10 @@ async def addInvoice(request,data):
                 query_noti = """INSERT INTO invoices (nro_invoice,id_user,total,id_status,id_purchase_order,paid,created_at,deleted,date,name_supplier,paid_at,path,shipping_address,tax,payment_terms,currency,shipping_charges) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
                 records = (request["nro_invoice"],request["user"],float(request["total"]),1,request["id_purchase_order"],False,(datetime.now()).timestamp(),False,request["date"],request["supplier"],None,request["path"],request["shipping_address"],request["tax"],request["payment_terms"],request["currency"],request["shipping_charges"],)
                 cursor["cursor"].execute(query_noti,records)
+
+                query_po = """UPDATE purchase_order SET completed = true, completed_at= %s WHERE id = %s"""
+                recordspo = (datetime.now().timestamp(),request['id_purchase_order'],)
+                cursor["cursor"].execute(query_po,recordspo)
                 
                 # query_search = """SELECT id from users WHERE first_name = %s"""
                 # cursor["cursor"].execute(query_search,(request["supplier"],))

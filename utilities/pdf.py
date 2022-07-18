@@ -15,10 +15,10 @@ from utilities.connections import connectPSQL
 from utilities.sendEmails import sendPurchaseOrder
 import shutil 
 import os
-# url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
-url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
-# url_reports = '/home/carlos/Desktop/tg/reports/'
-url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
+url_to_move = "/home/carlos/Desktop/tg/invoicing-front/src/assets/PDFs/"
+# url_to_move = "C:/Users/Usuario/Desktop/Angular 13-Tesis/material/src/assets\PDFs/"
+url_reports = '/home/carlos/Desktop/tg/reports/'
+# url_reports = "C:/Users/Usuario/Desktop/PDF_Reports/"
 
 async def pdfPurchaseOrder(request,data):
     try:
@@ -132,31 +132,49 @@ async def pdfReport(request):
     try:
         answers3=[]
         Story = [] 
+        initial = ''
         id = str(uuid4())[:5]
         if 'nro_invoice' in request['list'][0]:
             answers3.append(['Ref','Total','Encargado','Proveedor','Estado','Fecha',])
             for x in request["list"]:
+                initial = ''
+
                 user = x['user'].split(' ')
+                supplier = x['supplier'].split(' ')
                 if len(user) > 2:
                     user = user[0]+ ' '+ user[2]
                 else:
                     user = user[0]+ ' '+ user[1]
-                row = [x['nro_invoice'],str(x['total'])+'$',user,x['supplier'],x['status'],str(datetime.fromtimestamp(x['date']))[:10]]
+                if len(supplier)>2:
+                    for y in supplier:
+                        initial += y[0]
+                else:
+                    initial = x['supplier']
+                
+                row = [x['nro_invoice'],str(x['total'])+'$',user,initial,x['status'],str(datetime.fromtimestamp(x['date']))[:10]]
                 answers3.append(row)
         else:
             answers3.append(['Ref','Encargado','Proveedor','Moneda','Estado','Fecha',])
             for x in request["list"]:
+                initial = ''
                 if x['completed'] == True:
                     x['completed'] = 'Procesada'
                 else:
                     x['completed'] = 'Por procesar'
                 user = x['user'].split(' ')
+                supplier = x['supplier'].split(' ')
+
                 if len(user) > 2:
                     user = user[0]+ ' '+ user[2]
                 else:
                     user = user[0]+ ' '+ user[1]
+                if len(supplier)>2:
+                    for y in supplier:
+                        initial += y[0]
+                else:
+                    initial = x['supplier']
 
-                row = [x['nro_order'],user,x['supplier'],x['currency'][0],x['completed'],str(datetime.fromtimestamp(x['date']))[:10]]
+                row = [x['nro_order'],user,initial,x['currency'][0],x['completed'],str(datetime.fromtimestamp(x['date']))[:10]]
                 answers3.append(row)
 
         doc = SimpleDocTemplate("report_{id}.pdf".format(id=id), pagesize=letter,

@@ -57,6 +57,7 @@ async def count_pro_unpro_daily():
         records = (today.timestamp(),today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
+        print(data)
         if len(data)==0:
             data = [[0,0],[0,0]]
         if len(data)==1 and data[0][1]==False:
