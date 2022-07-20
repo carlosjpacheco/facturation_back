@@ -196,7 +196,7 @@ async def pdfReport(request):
         if 'nro_invoice' in request['list'][0]:
             Story.append(Paragraph('<strong>Reporte de Facturas</strong>',estiloT))
         else:
-            Story.append(Paragraph('<strong>Reporte de Ordenes de compras</strong>',estiloT))
+            Story.append(Paragraph('<strong>Reporte de Órdenes de compras</strong>',estiloT))
         Story.append(Spacer(1, 12))
         Story.append(Paragraph('Fecha de inicio:<strong>{start_date}</strong>'.format(start_date = str(request['start_date'])[:10]),estiloN))
         Story.append(Spacer(1, 12))
