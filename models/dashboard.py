@@ -22,7 +22,6 @@ async def amount_paid_in_invoices_daily():
         data = cursor['cursor'].fetchall()
         if len(data)==0:
             data = [[0,0]]
-        print(data)
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -57,7 +56,6 @@ async def count_pro_unpro_daily():
         records = (today.timestamp(),today.timestamp(),)
         cursor['cursor'].execute(query,records)
         data = cursor['cursor'].fetchall()
-        print(data)
         if len(data)==0:
             data = [[0,0],[0,0]]
         if len(data)==1 and data[0][1]==False:
