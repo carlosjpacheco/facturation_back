@@ -61,7 +61,7 @@ def sendPswAdm(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Recuperación de contraseña</h2>
                         </div>
-                        <img src="https://scontent-bog1-1.xx.fbcdn.net/v/t1.18169-9/13902758_1765973353659765_2515708523114629158_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bwAUI6NqNFYAX-xvVXA&_nc_ht=scontent-bog1-1.xx&oh=00_AT8LW49TtyQO7zTW7ajn7sDhNM4pZOiyymRl4rdCdhBHMQ&oe=62E3DBD1" style="height: 300px;position:absolute;margin-top:0;display:block;margin:auto;">
+                        <img style="height: 200px;" src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">Tu contraseña es</h2>
                             <h2 style="color:#F8F8FE">{psw}</h2>
@@ -95,7 +95,7 @@ def rejectInvoiceMail(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Factura Rechazada</h2>
                         </div>
-                        <img src="https://scontent-bog1-1.xx.fbcdn.net/v/t1.18169-9/13902758_1765973353659765_2515708523114629158_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bwAUI6NqNFYAX-xvVXA&_nc_ht=scontent-bog1-1.xx&oh=00_AT8LW49TtyQO7zTW7ajn7sDhNM4pZOiyymRl4rdCdhBHMQ&oe=62E3DBD1" style="height: 300px;position:absolute;margin-top:0;display:block;margin:auto;">
+                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">La Factura Nro: {nro_invoice} ha sido rechazada, por favor subirla nuevamente.</h2>
                         </div>
@@ -129,7 +129,7 @@ def updatePsw(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Tu contraseña ha sido actualizada</h2>
                         </div>
-                        <img src="https://scontent-bog1-1.xx.fbcdn.net/v/t1.18169-9/13902758_1765973353659765_2515708523114629158_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bwAUI6NqNFYAX-xvVXA&_nc_ht=scontent-bog1-1.xx&oh=00_AT8LW49TtyQO7zTW7ajn7sDhNM4pZOiyymRl4rdCdhBHMQ&oe=62E3DBD1" style="height: 300px;position:absolute;margin-top:0;display:block;margin:auto;">
+                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">Tu nueva contraseña es</h2>
                             <h2 style="color:#F8F8FE">{psw}</h2>
@@ -165,7 +165,7 @@ def userRegistered(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Bienvenido al sistema de facturación de LoreBI</h2>
                         </div>
-                        <img src="https://scontent-bog1-1.xx.fbcdn.net/v/t1.18169-9/13902758_1765973353659765_2515708523114629158_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bwAUI6NqNFYAX-xvVXA&_nc_ht=scontent-bog1-1.xx&oh=00_AT8LW49TtyQO7zTW7ajn7sDhNM4pZOiyymRl4rdCdhBHMQ&oe=62E3DBD1" style="height: 300px;position:absolute;margin-top:0;display:block;margin:auto;">
+                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">Usuario</h2>
                             <h2 style="color:#F8F8FE">{username}</h2>
