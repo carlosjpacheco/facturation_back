@@ -257,9 +257,11 @@ async def selectProducts():
         cursor['cursor'].execute(query)
         products = cursor['cursor'].fetchall()
         for x in products:
-            prod=x[0][0][0][1:-1]
-            if prod not in product:
-                product.append(prod)
+            for y in x:
+                for b in y:
+                    prod=b[0][1:-1]
+                    if prod not in product:
+                        product.append(prod)
         return json({"data":product,"code":200},200)
     except (Exception, psycopg2.Error) as error:
         return json({'error':str(error),'code':500},500)

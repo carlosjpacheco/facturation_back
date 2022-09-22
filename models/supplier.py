@@ -66,6 +66,13 @@ async def updateSupplier(request):
         request["rif"]= "J-"+str(request["rif"])
         valid = await validUpdateSupplier(request)
         if valid == True:
+            sql1 = """Select name from supplier where id = %s"""
+            cursor["cursor"].execute(sql1,(request["id"],))
+            supplier = cursor["cursor"].fetchone()
+            
+            sql2 = """Update users set first_name=%s where first_name = %s"""
+            cursor["cursor"].execute(sql2,(request["name"],supplier[0],))
+
             sql_update = """Update supplier set name=%s, rif=%s, fiscal_direction=%s, phone=%s, email=%s, contact_name=%s,
                                 contact_lastname=%s, contact_email=%s, contact_phone=%s where id = %s"""
             cursor["cursor"].execute(sql_update,(request["name"],request["rif"],request["fiscal_direction"],

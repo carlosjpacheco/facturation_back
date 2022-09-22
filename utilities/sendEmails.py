@@ -14,8 +14,8 @@ def sendPurchaseOrder(destiny,po_id):
         password = "bxbgeryvljjkccvg"
         message['From'] = 'carlosjpa1305@gmail.com'
         message['To'] = destiny
-        message['Subject']="LoreBi"
-        message.attach(MIMEText("Orden de Compra #{id}".format(id =  po_id), 'plain'))
+        message['Subject']="LoreBI: Nueva Orden de Compra Generada"
+        message.attach(MIMEText("Estimado Proveedor. Se le ha generado una nueva Orden de Compra, con número de registro #{id}. Se le recuerda generar la factura correspondiente a la misma, enviarla como respuesta a este correo o subirla al sistema para ser procesada. Saludos.".format(id =  po_id), 'plain'))
         # create server
         server = smtplib.SMTP('smtp.gmail.com: 587')
         
@@ -95,7 +95,7 @@ def rejectInvoiceMail(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Factura Rechazada</h2>
                         </div>
-                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
+                        <img style="height: 200px;" src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">La Factura Nro: {nro_invoice} ha sido rechazada, por favor subirla nuevamente.</h2>
                         </div>
@@ -129,7 +129,7 @@ def updatePsw(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Tu contraseña ha sido actualizada</h2>
                         </div>
-                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
+                        <img style="height: 200px;" src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">Tu nueva contraseña es</h2>
                             <h2 style="color:#F8F8FE">{psw}</h2>
@@ -165,7 +165,7 @@ def userRegistered(destinatario,msgA,request):
                         <div style="background-color:#3C49BD;padding:10px 20px;text-align:center;display:block;">
                             <h2 style="font-family:Georgia, 'Times New Roman', Times, serif;color:#F7F8FC;">Bienvenido al sistema de facturación de LoreBI</h2>
                         </div>
-                        <img src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
+                        <img style="height: 200px;" src="https://pbs.twimg.com/profile_images/818456697165463552/ZvdEK7uk_400x400.jpg">
                         <div style="background:#3C49BD;">
                             <h2 style="color:#F8F8FE;">Usuario</h2>
                             <h2 style="color:#F8F8FE">{username}</h2>

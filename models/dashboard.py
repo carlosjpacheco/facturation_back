@@ -186,20 +186,31 @@ async def amount_paid_inv_by_user(request):
 async def listInvoicesSummary(request):
     try:
         cursor = connectPSQL()
-        today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
+        start = datetime.strptime(request["dates"]['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request["dates"]['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
+        today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         if request['daily']==False:
-            today = today - timedelta(days=14)
-        invoicesArr = []
-        details = []
-        query_search = """
+            query_search = """
+                SELECT inv.id,inv.nro_invoice,inv.id_user,inv.id_status,inv.id_purchase_order, inv.paid, inv.created_at, inv.deleted,inv.date,inv.name_supplier,inv.paid_at,inv.total, inv.paid_at
+                from invoices inv , purchase_order po
+                where inv.created_at >= %s and inv.created_at <= %s
+                and inv.id_purchase_order = po.id
+                group by po.id_currency,inv.id"""
+
+            cursor["cursor"].execute(query_search,(start.timestamp(),end.timestamp(),))
+            invoices = cursor["cursor"].fetchall()
+        else:
+            query_search = """
             SELECT inv.id,inv.nro_invoice,inv.id_user,inv.id_status,inv.id_purchase_order, inv.paid, inv.created_at, inv.deleted,inv.date,inv.name_supplier,inv.paid_at,inv.total, inv.paid_at
             from invoices inv , purchase_order po
             where inv.paid_at >= %s
             and inv.id_purchase_order = po.id
             group by po.id_currency,inv.id"""
-
-        cursor["cursor"].execute(query_search,(today.timestamp(),))
-        invoices = cursor["cursor"].fetchall()
+            cursor["cursor"].execute(query_search,(today.timestamp(),))
+            invoices = cursor["cursor"].fetchall()
+        
+        invoicesArr = []
+        details = []
         if invoices:
             for x in invoices:
                 query_search = """SELECT * from purchase_order WHERE id = %s"""
@@ -239,23 +250,34 @@ async def listInvoicesSummary(request):
         else:
             return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
+        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def listPurchaseOrderSummary(request):
     try:
         cursor = connectPSQL()
+        start = datetime.strptime(request["dates"]['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(request["dates"]['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         if request['daily']==False:
-            today = today - timedelta(days=14)
-        purchaseOrdersArr = []
-        query_search = """
+            query_search = """
+                select *
+                from purchase_order po
+                where date >= %s and date <= %s
+            """
+            records = (start.timestamp(),end.timestamp(),)
+            cursor['cursor'].execute(query_search,records)
+            purchaseOrders = cursor["cursor"].fetchall()
+        else:
+            query_search = """
             select *
             from purchase_order po
-            where completed_at >= %s or date >= %s
-        """
-        records = (today.timestamp(),today.timestamp(),)
-        cursor['cursor'].execute(query_search,records)
-        purchaseOrders = cursor["cursor"].fetchall()
+            where date >= %s
+            """
+            records = (today.timestamp(),)
+            cursor['cursor'].execute(query_search,records)
+            purchaseOrders = cursor["cursor"].fetchall()            
+        purchaseOrdersArr = []
         if purchaseOrders:
             for x in purchaseOrders:
                 query_search = """SELECT name from currency WHERE id = %s"""
