@@ -12,10 +12,8 @@ async def amount_paid_in_invoices_daily():
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
         query = """
             select SUM(inv.total), count(inv.id)
-            from invoices inv , purchase_order po
+            from invoices inv
             where inv.paid_at >= %s
-            and inv.id_purchase_order = po.id
-            group by  inv.id
         """
         records = (today.timestamp(),)
         cursor['cursor'].execute(query,records)
@@ -47,23 +45,33 @@ async def count_pro_unpro_daily():
     try:
         cursor = connectPSQL()
         today = today =datetime.strptime(str(date.today())+"T00:00:01Z","%Y-%m-%dT%H:%M:%SZ")
-        query = """
-            select count(po.id),po.completed
+        query_completed = """
+            select count(po.id)
             from purchase_order po
-            where completed_at >= %s or date >= %s
-            group by po.completed
-			order by po.completed desc
+            where completed_at >= %s and po.completed = true
         """
-        records = (today.timestamp(),today.timestamp(),)
-        cursor['cursor'].execute(query,records)
-        data = cursor['cursor'].fetchall()
-        print(data)
-        if len(data)==0:
-            data = [[0,0],[0,0]]
-        if len(data)==1 and data[0][1]==False:
-            data.insert(0,[0,0])
-        if len(data)==1 and data[0][1]==True:
-            data.append([0,[0,0]])
+        records = (today.timestamp(),)
+        cursor['cursor'].execute(query_completed,records)
+        data_completed = cursor['cursor'].fetchall()
+        if data_completed:
+            completed = data_completed[0]
+        else:
+            completed = 0
+        query_generate = """
+            select count(po.id)
+            from purchase_order po
+            where date >= %s 
+        """
+        records = (today.timestamp(),)
+        cursor['cursor'].execute(query_generate,records)
+        data_generate = cursor['cursor'].fetchall()
+        if data_generate:
+            generate = data_generate[0]
+        else:
+            generate = 0
+        data=[]
+        data.append((completed,True))
+        data.append((generate,False))
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -81,7 +89,6 @@ async def amount_paid_in_invoices_lastDay(request):
             where inv.paid_at >= %s
             and inv.paid_at <= %s
             and inv.id_purchase_order = po.id
-            group by inv.id
         """
         records = (start.timestamp(),end.timestamp(),)
         cursor['cursor'].execute(query,records)
@@ -115,23 +122,34 @@ async def count_pro_unpro_LastDays(request):
         cursor = connectPSQL()
         start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
         end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
-        query = """
-            select count(po.id),po.completed
+        query_completed = """
+            select count(po.id)
             from purchase_order po
             where completed_at >= %s and completed_at<=%s
-            or date >= %s and date <=%s
-            group by po.completed
-			order by po.completed desc
         """
-        records = (start.timestamp(),end.timestamp(),start.timestamp(),end.timestamp(),)
-        cursor['cursor'].execute(query,records)
-        data = cursor['cursor'].fetchall()
-        if len(data)==1 and data[0][1]==False:
-            data.insert(0,[0,0])
-        if len(data)==1 and data[0][1]==True:
-            data.append([0,0])
-        if len(data)==0:
-            data = [[0,0],[0,0]]
+        records = (start.timestamp(),end.timestamp(),)
+        cursor['cursor'].execute(query_completed,records)
+        data_completed = cursor['cursor'].fetchall()
+        
+        if data_completed:
+            completed = data_completed[0]
+        else:
+            completed = 0
+        query_generate = """
+            select count(po.id)
+            from purchase_order po
+            where date >= %s and date <=%s
+        """
+        records = (start.timestamp(),end.timestamp(),)
+        cursor['cursor'].execute(query_generate,records)
+        data_generate = cursor['cursor'].fetchall()
+        if data_generate:
+            generate = data_generate[0]
+        else:
+            generate = 0
+        data = []
+        data.append((completed,True))
+        data.append((generate,False))
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)
@@ -250,7 +268,6 @@ async def listInvoicesSummary(request):
         else:
             return json({"data":[],"code":200},200)
     except (Exception, psycopg2.Error) as error:
-        print(error)
         return json({"error":str(error),"code":500},500)
 
 async def listPurchaseOrderSummary(request):
@@ -263,18 +280,19 @@ async def listPurchaseOrderSummary(request):
             query_search = """
                 select *
                 from purchase_order po
-                where date >= %s and date <= %s
+                where (date >= %s and date <= %s) or
+                (completed_at >= %s and completed_at <= %s)
             """
-            records = (start.timestamp(),end.timestamp(),)
+            records = (start.timestamp(),end.timestamp(),start.timestamp(),end.timestamp(),)
             cursor['cursor'].execute(query_search,records)
             purchaseOrders = cursor["cursor"].fetchall()
         else:
             query_search = """
             select *
             from purchase_order po
-            where date >= %s
+            where completed_at >= %s or date >= %s
             """
-            records = (today.timestamp(),)
+            records = (today.timestamp(),today.timestamp(),)
             cursor['cursor'].execute(query_search,records)
             purchaseOrders = cursor["cursor"].fetchall()            
         purchaseOrdersArr = []

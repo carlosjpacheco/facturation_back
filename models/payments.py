@@ -80,7 +80,7 @@ async def sendPayment(request,data):
             await payInvoice({'id':request['id'],"receiver":request['receiver']},data)
             return json({"data":'Pago creado','code':200},200)
         else:
-            print(payout)
             return json({"error":'Error',"code":500},500)
     except Exception as error:
+        print(error)
         return json({'error':str(error.response),"code":500},500)
