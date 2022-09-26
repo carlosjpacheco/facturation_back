@@ -74,9 +74,11 @@ async def notifyAllUsers(request,data):
                         'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = x[1])
                     })
         else:
+            start = datetime.strptime(request['start_date'][:10]+'T00:00:00Z',"%Y-%m-%dT%H:%M:%SZ")
+            end = datetime.strptime(request['end_date'][:10]+'T23:59:59Z',"%Y-%m-%dT%H:%M:%SZ")
             if request['invoices'] == True:
                 query = """ SELECT id_user, nro_invoice FROM invoices WHERE id_status = 1 and created_at > %s and created_at < %s"""
-                cursor['cursor'].execute(query,(request['start_date'].timestamp(),request['end_date'].timestamp()))
+                cursor['cursor'].execute(query,(start.timestamp(),end.timestamp()))
                 id_users = cursor['cursor'].fetchall()
                 for x in id_users:
                     await addNotification({
@@ -86,8 +88,9 @@ async def notifyAllUsers(request,data):
                     })
             if request['invoices'] == False:
                 query = """ SELECT id_user, id FROM purchase_order WHERE completed = false and date > %s and date < %s"""
-                cursor['cursor'].execute(query,(request['start_date'].timestamp(),request['end_date'].timestamp()))
+                cursor['cursor'].execute(query,(start.timestamp(),end.timestamp(),))
                 id_users = cursor['cursor'].fetchall()
+                print(id_users)
                 for x in id_users:
                     await addNotification({
                         'source':data,
