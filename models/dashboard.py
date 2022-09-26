@@ -20,7 +20,6 @@ async def amount_paid_in_invoices_daily():
         data = cursor['cursor'].fetchall()
         if len(data)==0:
             data = [[0,0]]
-        print(data)
         return json({'data':data,'code':200},200)
     except (Exception, psycopg2.Error) as error:
         return json({"error":str(error),"code":500},500)

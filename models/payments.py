@@ -4,8 +4,7 @@ import psycopg2
 from sanic.response import json
 from models.notifications import addNotification
 from uuid import uuid4
-from paypalrestsdk import Payout, ResourceNotFound,Refund
-import random
+from paypalrestsdk import Payout
 
 async def payInvoice(request,data):
     try:

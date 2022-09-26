@@ -153,7 +153,7 @@ def userRegistered(destinatario,msgA,request):
         msg = EmailMessage()
         password = "bxbgeryvljjkccvg"
         msg['From'] = 'carlosjpa1305@gmail.com'
-        msg['To'] = destinatario
+        msg['To'] = "carlosjpa13@gmail.com"
         msg['Subject']='LoreBI CA'
         msg.attach(MIMEText(msgA, 'plain'))
         msg.set_content('''

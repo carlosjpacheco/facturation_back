@@ -80,16 +80,16 @@ async def pay_invoice_bar():
         week = today - timedelta(days=6)
         cursor = connectPSQL()
         while(week <= today):
-            query_search = """SELECT COUNT(ord.id)
+            query_search = """SELECT COUNT(inv.id)
                             from invoices inv WHERE
-                            inv.id_status = 0
-                            paid_at >= %s and paid_at <= %s;"""
+                            inv.id_status = 0 and
+                            inv.paid_at >= %s and inv.paid_at <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             orders = cursor["cursor"].fetchone()
-            query_search = """SELECT COUNT(ord.id)
+            query_search = """SELECT COUNT(inv.id)
                             from invoices inv WHERE
-                            inv.id_status = False
-                            paid_at >= %s and paid_at <= %s;"""
+                            inv.id_status = 1 and
+                            inv.created_at >= %s and inv.created_at <= %s;"""
             cursor["cursor"].execute(query_search,(week.timestamp(),(week + timedelta(days=1)).timestamp()))
             ordersP = cursor["cursor"].fetchone()
             days.append(str(week)[5:10])

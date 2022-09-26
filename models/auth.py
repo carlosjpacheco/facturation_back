@@ -1,16 +1,11 @@
 from datetime import datetime
 import base64
-import hashlib
-from os import curdir
-import string
 from sanic_jwt_extended import JWT
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
 from utilities.validators import validSignup, validUpdateUser
-import random
 from utilities.sendEmails import sendPswAdm,updatePsw, userRegistered
-import json as jsonResponse
 
 async def signup(request):
     try:

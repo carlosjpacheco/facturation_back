@@ -5,7 +5,7 @@ from utilities.sendEmails import userRegistered
 from utilities.connections import connectPSQL
 import psycopg2
 from sanic.response import json
-from utilities.validators import validSignup, validSupplierInfo,validUpdateSupplier
+from utilities.validators import validSupplierInfo,validUpdateSupplier
 
 async def addSupplier(request):
     try:
