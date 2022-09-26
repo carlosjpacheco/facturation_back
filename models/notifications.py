@@ -102,6 +102,7 @@ async def notifyAllUsers(request,data):
 
 async def notifyUser(request,data):
     try:
+        print(request)
         cursor = connectPSQL()
         if request['invoices'] == True:  
             query = """ SELECT id_user, nro_invoice FROM invoices WHERE id_status = 1 AND id = %s"""
@@ -109,17 +110,17 @@ async def notifyUser(request,data):
             id_users = cursor['cursor'].fetchone()
             await addNotification({
                 'source':data,
-                'destination':id_users[0],
-                'description':'Se te envio un recordatorio para procesar la factura #{id}'.format(id = id_users[1])
+                'destination':id_users[0][0],
+                'description':'Se te envio un recordatorio para procesar la factura #{id}'.format(id = id_users[0][1])
             })
         if request['invoices'] == False:
             query = """ SELECT id_user,id FROM purchase_order WHERE completed = false AND id = %s"""
-            cursor['cursor'].execute(query)
+            cursor['cursor'].execute(query,(request['id'],))
             id_users = cursor['cursor'].fetchall()
             await addNotification({
                 'source':data,
-                'destination':id_users[0],
-                'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = id_users[1])
+                'destination':id_users[0][0],
+                'description':'Se te envio un recordatorio para procesar la la orden de compra  #{id}'.format(id = id_users[0][1])
             })
         return json({"data":"Usuarios notificados",'code':200},200)
     except(Exception, psycopg2.Error) as error:
